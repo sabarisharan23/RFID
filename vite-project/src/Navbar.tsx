@@ -10,8 +10,7 @@ const menuItems = {
   ],
   actions: [
     { label: "Asset", route: "/assets" },
-    { label: "RFID Add", route: "/rfid-add" },
-    { label: "RFID Edit", route: "/rfid-edit" }
+    { label: "Configure RFID", route: "/rfid-add" },
   ]
 };
 

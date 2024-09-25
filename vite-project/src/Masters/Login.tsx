@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const navigate = useNavigate();
 
   const handleLogin = () => {
-    // Handle login logic here
-    console.log('Username:', username);
-    console.log('Password:', password);
+    // Check credentials
+    if (username === 'user1@gmail.com' && password === 'password') {
+      console.log('Login successful');
+      navigate('/dashboard'); // Navigate to the dashboard
+
+    } else {  
+      console.log('Invalid credentials');
+      window.alert('Invalid credentials');
+      // You may want to handle error display here
+    }
   };
 
   return (
