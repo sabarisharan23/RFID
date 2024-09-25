@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const EditCupboard: React.FC = () => {
+  const navigate = useNavigate();
   const [cupboard, setCupboard] = useState('cup-1');
   const [rack, setRack] = useState('g-ty');
   const [cupboardDescription, setCupboardDescription] = useState('gty-100');
@@ -16,13 +18,12 @@ const EditCupboard: React.FC = () => {
   };
 
   const handleBack = () => {
-    // Add back logic here
-    console.log('Back');
+   navigate('/cupboards');
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-3xl font-semibold mt-6">Cupboards</div>
+      <div className="text-3xl font-semibold mt-6">Edit Cupboards</div>
 
       {/* Form */}
       <div className="bg-white mt-6 shadow rounded p-6">
@@ -72,10 +73,11 @@ const EditCupboard: React.FC = () => {
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-start space-x-4 mt-6">
+        <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={handleBack}
             className="bg-red-500 text-white px-4 py-2 rounded"
+            
           >
             Back
           </button>

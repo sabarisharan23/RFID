@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const RackForm: React.FC = () => {
+  const navigate = useNavigate();
   const [row, setRow] = useState('');
   const [rackName, setRackName] = useState('');
   const [rackDescription, setRackDescription] = useState('');
@@ -11,13 +13,12 @@ const RackForm: React.FC = () => {
   };
 
   const handleBack = () => {
-    // Add back logic here
-    console.log('Back');
+   navigate('/racks');
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-3xl font-semibold mt-6">Racks</div>
+      <div className="text-3xl font-semibold mt-6">Add Racks</div>
 
       {/* Form */}
       <div className="bg-white mt-6 shadow rounded p-6">

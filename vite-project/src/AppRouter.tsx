@@ -9,6 +9,8 @@ import AddCupboard from "./Masters/Cupboards/AddCupboard";
 import EditCupboard from "./Masters/Cupboards/EditCupboard";
 import AssetForm from "./Masters/AssetsForm/Assets";
 import Layout from "./Layout";
+import AssetTable from "./Masters/AssetsForm/AddAssets";
+import EditAssets from "./Masters/AssetsForm/EditAssets";
 
 export const router = createBrowserRouter([
   {
@@ -57,9 +59,19 @@ export const router = createBrowserRouter([
         handle: { title: "edit-cupboards" },
       },
       {
+        path: "/add-assets",
+        element: <AssetTable />,
+        handle: { title: "assets" },
+      },
+      {
+        path: "/edit-assets",
+        element: <EditAssets />,
+        handle: { title: "edit-assets" },
+      },
+      {
         path: "/assets",
         element: <AssetForm />,
-        handle: { title: "assets" },
+        handle: { title: "add-assets" },
       },
     ],
   },

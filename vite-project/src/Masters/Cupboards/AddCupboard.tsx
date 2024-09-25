@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AddCupboard: React.FC = () => {
+  const navigate = useNavigate();
   const [cupboard, setCupboard] = useState('');
   const [rack, setRack] = useState('');
   const [cupboardDescription, setCupboardDescription] = useState('');
@@ -11,13 +13,12 @@ const AddCupboard: React.FC = () => {
   };
 
   const handleBack = () => {
-    // Add back logic here
-    console.log('Back');
-  };
+    navigate('/cupboards');
+   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-3xl font-semibold mt-6">Cupboards</div>
+      <div className="text-3xl font-semibold mt-6">Add Cupboards</div>
 
       {/* Form */}
       <div className="bg-white mt-6 shadow rounded p-6">

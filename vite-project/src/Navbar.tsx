@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Log Out Button */}
-      <button className="text-gray-600" onClick={() => navigate('/logout')}>
+      <button className="text-gray-600" onClick={() => navigate('/')}>
         Log Out
       </button>
     </div>

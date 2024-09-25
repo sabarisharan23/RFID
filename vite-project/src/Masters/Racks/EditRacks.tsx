@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const RowForm: React.FC = () => {
+  const navigate = useNavigate();
   const [rowName, setRowName] = useState('');
   const [rowDescription, setRowDescription] = useState('');
 
-  const handleSave = () => {
+  const handleUpdate = () => {
     // Add save logic here
     console.log('Saved', { rowName, rowDescription });
   };
-
+  
   const handleBack = () => {
-    // Add back logic here
-    console.log('Back');
+    navigate('/racks');
   };
+  const handleDelete = () => {
+    console.log('Saved', { rowName, rowDescription });
+   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-3xl font-semibold mt-6">Racks</div>
+      <div className="text-3xl font-semibold mt-6">Edit Racks</div>
       {/* Form */}
       <div className="bg-white mt-6 shadow rounded p-6">
         <div className="grid grid-cols-2 gap-6">
@@ -58,10 +62,16 @@ const RowForm: React.FC = () => {
             Back
           </button>
           <button
-            onClick={handleSave}
+            onClick={handleUpdate}
             className="bg-red-500 text-white px-4 py-2 rounded"
           >
-            Save
+            Update
+          </button>
+          <button
+            onClick={handleDelete}
+            className="bg-red-500 text-white px-4 py-2 rounded"
+          >
+            Delete
           </button>
         </div>
       </div>

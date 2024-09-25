@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CupboardTable: React.FC = () => {
+  const navigate = useNavigate();
   const [entries, setEntries] = useState(10);
   const [search, setSearch] = useState('');
 
@@ -14,8 +16,8 @@ const CupboardTable: React.FC = () => {
 
       {/* Action Buttons */}
       <div className="flex space-x-4 mt-4">
-        <button className="bg-red-500 text-white px-4 py-2 rounded">Add</button>
-        <button className="bg-red-500 text-white px-4 py-2 rounded">Edit</button>
+        <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-cupboards')}>Add</button>
+        <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-cupboards')}>Edit</button>
         <button className="bg-red-500 text-white px-4 py-2 rounded">Excel</button>
       </div>
 

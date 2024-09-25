@@ -1,280 +1,87 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const AssetForm: React.FC = () => {
-  const [assetType, setAssetType] = useState('Asset');
-  const [assetName, setAssetName] = useState('');
-  const [capacity, setCapacity] = useState('');
-  const [pn3x5, setPn3x5] = useState('');
-  const [mfgPn, setMfgPn] = useState('');
-  const [vendor, setVendor] = useState('');
-  const [row, setRow] = useState('');
-  const [rack, setRack] = useState('');
-  const [project, setProject] = useState('');
-  const [cupboard, setCupboard] = useState('NA');
-  const [tagId, setTagId] = useState('');
-  const [notes, setNotes] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleSave = () => {
-    // Add save logic here
-    console.log('Saved', {
-      assetType,
-      assetName,
-      capacity,
-      pn3x5,
-      mfgPn,
-      vendor,
-      row,
-      rack,
-      project,
-      cupboard,
-      tagId,
-      notes,
-      image,
-      file,
-    });
-  };
-
-  const handleBack = () => {
-    // Add back logic here
-    console.log('Back');
-  };
-
+const AssetTable: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-3xl font-semibold mt-6">Cupboards</div>
+      {/* Action Buttons */}
+      <div className="bg-white p-4 shadow mb-6">
+        <h1 className="text-3xl font-semibold pb-4">Assets</h1>
+        <div className="space-x-4">
+          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-assets')}>Add</button>
+          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-assets')}>Edit</button>
+          <button className="bg-red-500 text-white px-4 py-2 rounded">Excel</button>
+       
+        </div>
+      </div>
 
-      {/* Form */}
-      <div className="bg-white mt-6 shadow rounded p-6">
-        <div className="grid grid-cols-3 gap-6">
-          {/* Asset Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Asset Type <span className="text-red-500">*</span>
-            </label>
+      {/* Table Section */}
+      <div className="bg-white p-4 shadow rounded">
+        {/* Table Filter */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <label htmlFor="entries" className="mr-2 text-sm text-gray-600">Show</label>
             <select
-              value={assetType}
-              onChange={(e) => setAssetType(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
+              id="entries"
+              className="border border-gray-300 rounded p-1 text-sm"
             >
-              <option value="Asset">Asset</option>
-              <option value="Equipment">Equipment</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
             </select>
+            <span className="ml-2 text-sm text-gray-600">entries</span>
           </div>
 
-          {/* 3x5 PN */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              3x5 PN
-            </label>
+          {/* Search */}
+          <div className="flex items-center">
+            <label htmlFor="search" className="mr-2 text-sm text-gray-600">Search:</label>
             <input
+              id="search"
               type="text"
-              value={pn3x5}
-              onChange={(e) => setPn3x5(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter 3x5 PN"
+              className="border border-gray-300 rounded p-1 text-sm"
+              placeholder="Search"
             />
-          </div>
-
-          {/* MFG PN */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              MFG PN <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={mfgPn}
-              onChange={(e) => setMfgPn(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter MFG PN"
-            />
-          </div>
-
-          {/* Asset Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Asset Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={assetName}
-              onChange={(e) => setAssetName(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Asset Name"
-            />
-          </div>
-
-          {/* Vendor */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Vendor
-            </label>
-            <input
-              type="text"
-              value={vendor}
-              onChange={(e) => setVendor(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Vendor"
-            />
-          </div>
-
-          {/* Capacity */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Capacity <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Capacity"
-            />
-          </div>
-
-          {/* Row Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Row</label>
-            <select
-              value={row}
-              onChange={(e) => setRow(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            >
-              <option value="">Select</option>
-              <option value="Row 1">Row 1</option>
-              <option value="Row 2">Row 2</option>
-            </select>
-          </div>
-
-          {/* Rack Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Rack</label>
-            <select
-              value={rack}
-              onChange={(e) => setRack(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            >
-              <option value="">Select</option>
-              <option value="Rack 1">Rack 1</option>
-              <option value="Rack 2">Rack 2</option>
-            </select>
-          </div>
-
-          {/* Project Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Project
-            </label>
-            <select
-              value={project}
-              onChange={(e) => setProject(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            >
-              <option value="">Select</option>
-              <option value="Project A">Project A</option>
-              <option value="Project B">Project B</option>
-            </select>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Notes
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Notes"
-            />
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Image
-            </label>
-            <input
-              type="file"
-              onChange={handleImageUpload}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            />
-            <button className="bg-red-500 text-white px-4 py-2 mt-2 rounded">
-              Upload
-            </button>
-          </div>
-
-          {/* Cupboard Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cupboard
-            </label>
-            <select
-              value={cupboard}
-              onChange={(e) => setCupboard(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            >
-              <option value="NA">NA</option>
-              <option value="Cupboard 1">Cupboard 1</option>
-              <option value="Cupboard 2">Cupboard 2</option>
-            </select>
-          </div>
-
-          {/* Tag ID */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Tag ID <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={tagId}
-              onChange={(e) => setTagId(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Tag ID"
-            />
-          </div>
-
-          {/* File Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">File</label>
-            <input
-              type="file"
-              onChange={handleFileUpload}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            />
-            <button className="bg-red-500 text-white px-4 py-2 mt-2 rounded">
-              Upload
-            </button>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-start space-x-4 mt-6">
-          <button
-            onClick={handleBack}
-            className="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Back
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Save
-          </button>
+        {/* Table */}
+        <table className="w-full table-auto border-collapse border border-gray-300">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border border-gray-300 text-left">Asset Name</th>
+              <th className="p-2 border border-gray-300 text-left">MFG PN</th>
+              <th className="p-2 border border-gray-300 text-left">Item ID</th>
+              <th className="p-2 border border-gray-300 text-left">Model Number</th>
+              <th className="p-2 border border-gray-300 text-left">Capacity</th>
+              <th className="p-2 border border-gray-300 text-left">Tag ID</th>
+              <th className="p-2 border border-gray-300 text-left">Type</th>
+              <th className="p-2 border border-gray-300 text-left">Rack</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Example Row */}
+            <tr>
+              <td className="p-2 border border-gray-300">RAM</td>
+              <td className="p-2 border border-gray-300">22331asadasdadad</td>
+              <td className="p-2 border border-gray-300">-</td>
+              <td className="p-2 border border-gray-300">-</td>
+              <td className="p-2 border border-gray-300">12GB</td>
+              <td className="p-2 border border-gray-300">123333434545Jdikas</td>
+              <td className="p-2 border border-gray-300">Asset</td>
+              <td className="p-2 border border-gray-300">-</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+          <span>Showing 1 to 1 of 1 entries</span>
+          <div className="flex space-x-2">
+            <button className="px-3 py-1 border rounded">Previous</button>
+            <button className="px-3 py-1 border rounded">1</button>
+            <button className="px-3 py-1 border rounded">Next</button>
+          </div>
         </div>
       </div>
 
@@ -289,4 +96,4 @@ const AssetForm: React.FC = () => {
   );
 };
 
-export default AssetForm;
+export default AssetTable;
