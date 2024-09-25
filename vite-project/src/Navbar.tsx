@@ -10,7 +10,7 @@ const menuItems = {
   ],
   actions: [
     { label: "Asset", route: "/assets" },
-    { label: "Configure RFID", route: "/rfid-add" },
+    { label: "Configure RFID", route: "/RFIDTags" },
   ]
 };
 
@@ -20,12 +20,12 @@ const Navbar: React.FC = () => {
   return (
     <div className="flex justify-between items-center bg-white shadow p-4">
       {/* Logo */}
-      <div className="text-xl font-semibold">mindteck RFID</div>
+      <div className="text-2xl   font-bold text-zinc-500">Mindteck RFID</div>
 
       {/* Menu Items */}
       <div className="flex space-x-8">
         {/* Master Menu with Hover Dropdown */}
-        <div className="relative group">
+        {/* <div className="relative group">
           <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
             Master
           </button>
@@ -42,10 +42,10 @@ const Navbar: React.FC = () => {
               ))}
             </ul>
           </div>
-        </div>
+        </div> */}
 
         {/* Actions Menu with Hover Dropdown */}
-        <div className="relative group">
+        {/* <div className="relative group">
           <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
             Actions
           </button>
@@ -62,19 +62,19 @@ const Navbar: React.FC = () => {
               ))}
             </ul>
           </div>
-        </div>
+        </div> */}
 
         {/* Reports Menu (No Dropdown) */}
-        <button
+        {/* <button
           className="text-gray-600 hover:text-gray-800 focus:outline-none"
           onClick={() => navigate('/reports')}
         >
           Reports
-        </button>
+        </button> */}
       </div>
 
       {/* Log Out Button */}
-      <button className="text-gray-600" onClick={() => navigate('/')}>
+      <button className="text-gray-600 border font-semibold border-gray-200 rounded px-2 py-1 shadow-md" onClick={() => navigate('/')}>
         Log Out
       </button>
     </div>

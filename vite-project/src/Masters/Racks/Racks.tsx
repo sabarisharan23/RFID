@@ -12,7 +12,7 @@ const Racks: React.FC = () => {
       
 
       {/* Page Title */}
-      <div className="text-3xl font-semibold mt-6">Racks</div>
+      <div className="text-2xl font-semibold ">Racks</div>
 
       {/* Action Buttons */}
       <div className="flex space-x-4 mt-4">
@@ -80,12 +80,7 @@ const Racks: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-gray-500 text-sm text-center">
-        © 2024 www.mindteck.com
-      </div>
-      <div className="text-gray-500 text-sm text-center">
-        Version : 1.0.1 June 04, 2020
-      </div>
+      
     </div>
   );
 };

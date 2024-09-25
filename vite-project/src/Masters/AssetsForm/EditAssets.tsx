@@ -64,7 +64,9 @@ navigate('/assets');
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Form */}
+      <h1 className="text-2xl font-semibold pb-2">Edit Assets</h1>
       <div className="bg-white mt-6 shadow rounded p-6">
+
         <div className="grid grid-cols-3 gap-6">
           {/* Asset Type */}
           <div>
@@ -268,7 +270,7 @@ navigate('/assets');
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-center space-x-4 mt-6">
+        <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={handleBack}
             className="bg-red-500 text-white px-4 py-2 rounded"
@@ -291,12 +293,7 @@ navigate('/assets');
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-gray-500 text-sm text-center">
-        © 2024 www.mindteck.com
-      </div>
-      <div className="text-gray-500 text-sm text-center">
-        Version : 1.0.1 June 04, 2020
-      </div>
+      
     </div>
   );
 };

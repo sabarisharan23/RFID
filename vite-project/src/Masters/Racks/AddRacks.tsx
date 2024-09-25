@@ -37,7 +37,7 @@ const RackForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-3xl font-semibold mt-6">Add Racks</div>
+      <div className="text-2xl font-semibold ">Add Racks</div>
 
       {/* Form */}
       <div className="bg-white mt-6 shadow rounded p-6">
@@ -60,7 +60,7 @@ const RackForm: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <button className="bg-red-500 text-white px-2 py-2 rounded-full">
+              <button className="bg-red-500 text-white px-2 py-2 rounded-full" onClick={() => navigate('/add-row')}>
                 +
               </button>
             </div>
@@ -113,12 +113,7 @@ const RackForm: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-gray-500 text-sm text-center">
-        © 2024 www.mindteck.com
-      </div>
-      <div className="text-gray-500 text-sm text-center">
-        Version : 1.0.1 June 04, 2020
-      </div>
+      
     </div>
   );
 };

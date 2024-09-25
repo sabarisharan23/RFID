@@ -12,7 +12,7 @@ const CupboardTable: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-3xl font-semibold mt-6">Cupboards</div>
+      <div className="text-+++2xl font-semibold ">Cupboards</div>
 
       {/* Action Buttons */}
       <div className="flex space-x-4 mt-4">
@@ -89,12 +89,7 @@ const CupboardTable: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-gray-500 text-sm text-center">
-        © 2024 www.mindteck.com
-      </div>
-      <div className="text-gray-500 text-sm text-center">
-        Version : 1.0.1 June 04, 2020
-      </div>
+     
     </div>
   );
 };

@@ -11,6 +11,10 @@ import AssetForm from "./Masters/AssetsForm/Assets";
 import Layout from "./Layout";
 import AssetTable from "./Masters/AssetsForm/AddAssets";
 import EditAssets from "./Masters/AssetsForm/EditAssets";
+import RFIDTag from "./Actions/RFIDTags/RFIDTag";
+import ChangeRFIDTag from "./Actions/RFIDTags/ChangeRFID";
+import DisableRFIDTag from "./Actions/RFIDTags/DisableRFID";
+import AddRow from "./Masters/Racks/AddRow";
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +41,11 @@ export const router = createBrowserRouter([
         path: "/add-racks",
         element: <RackForm />,
         handle: { title: "rackform" },
+      },
+      {
+        path: "/add-row",
+        element: <AddRow />,
+        handle: { title: "row" },
       },
       {
         path: "/edit-racks",
@@ -72,6 +81,21 @@ export const router = createBrowserRouter([
         path: "/assets",
         element: <AssetForm />,
         handle: { title: "add-assets" },
+      },
+      {
+        path: "/RFIDTags",
+        element: <RFIDTag />,
+        handle: { title: "RFIDTags" },
+      },
+      {
+        path: "/changeRFID",
+        element: <ChangeRFIDTag />,
+        handle: { title: "changeRFID" },
+      },
+      {
+        path: "/disableRFID",
+        element: <DisableRFIDTag />,
+        handle: { title: "disableRFID" },
       },
     ],
   },

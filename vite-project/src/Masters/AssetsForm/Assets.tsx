@@ -8,9 +8,9 @@ const AssetTable: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Action Buttons */}
-      <div className="bg-white p-4 shadow mb-6">
-        <h1 className="text-3xl font-semibold pb-4">Assets</h1>
-        <div className="space-x-4">
+      <div className="">
+        <h1 className="text-2xl font-semibold pb-4">Assets</h1>
+        <div className="space-x-4 pb-6">
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-assets')}>Add</button>
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-assets')}>Edit</button>
           <button className="bg-red-500 text-white px-4 py-2 rounded">Excel</button>
@@ -23,7 +23,7 @@ const AssetTable: React.FC = () => {
         {/* Table Filter */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
-            <label htmlFor="entries" className="mr-2 text-sm text-gray-600">Show</label>
+            <label htmlFor="entries" className="mr-2  text-gray-600">Show</label>
             <select
               id="entries"
               className="border border-gray-300 rounded p-1 text-sm"
@@ -83,13 +83,9 @@ const AssetTable: React.FC = () => {
         </div>
       </div>
 
+
       {/* Footer */}
-      <div className="mt-8 text-gray-500 text-sm text-center">
-        © 2024 www.mindteck.com
-      </div>
-      <div className="text-gray-500 text-sm text-center">
-        Version : 1.0.1 June 04, 2020
-      </div>
+     
     </div>
   );
 };
