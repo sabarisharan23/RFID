@@ -24,10 +24,16 @@ const RackForm: React.FC = () => {
     fetchRowOptions();
   }, [getAssetsByParentId]); // Dependency array includes getAssetsByParentId
 
+  function generateRandom10DigitNumber() {
+    // Generate a random number between 1000000000 and 9999999999
+    const min = 1000000000; // 10 digits minimum
+    const max = 9999999999; // 10 digits maximum
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
   const handleSave = () => {
     // Add save logic here
     addAsset(
-      "01234567891",
+      `${generateRandom10DigitNumber}`,
       22,
       { name: rackName, description: rackDescription },
       selectedRow

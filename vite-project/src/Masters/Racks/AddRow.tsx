@@ -1,16 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAssetStore } from '../../store/store';
 
 const AddRow: React.FC = () => {
-    const navigate = useNavigate();
-    const handleBack=()=>{
-        navigate('/racks');
+  const navigate = useNavigate();
+  const [rowName, setRowName] = useState('');
+  const [rowDescription, setRowDescription] = useState('');
+  const {addAsset} = useAssetStore()
 
-    }
- 
+  function generateRandom10DigitNumber() {
+    // Generate a random number between 1000000000 and 9999999999
+    const min = 1000000000; // 10 digits minimum
+    const max = 9999999999; // 10 digits maximum
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+  const handleBack = () => {
+    navigate('/add-racks');
+  };
+
+  const handleSave = () => {
+    addAsset(`${generateRandom10DigitNumber}`, 21,{rowName, rowDescription},"1234567890");
+    handleBack();
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-        <h2 className="text-2xl font-semibold mb-6">Racks</h2>
+      <h2 className="text-2xl font-semibold mb-6">Racks</h2>
       <div className="bg-white shadow-md p-6 rounded-md ">
         
         {/* Form Section */}
@@ -23,6 +39,8 @@ const AddRow: React.FC = () => {
               type="text"
               id="rowName"
               placeholder="Enter Row Name"
+              value={rowName}
+              onChange={(e) => setRowName(e.target.value)}
               className="border border-gray-300 p-2 rounded-md focus:outline-none focus:border-blue-500"
             />
           </div>
@@ -35,6 +53,8 @@ const AddRow: React.FC = () => {
               type="text"
               id="rowDescription"
               placeholder="Enter Row Description"
+              value={rowDescription}
+              onChange={(e) => setRowDescription(e.target.value)}
               className="border border-gray-300 p-2 rounded-md focus:outline-none focus:border-blue-500"
             />
           </div>
@@ -45,7 +65,7 @@ const AddRow: React.FC = () => {
           <button className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none" onClick={handleBack}>
             Back
           </button>
-          <button className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none">
+          <button className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none" onClick={handleSave}>
             Save
           </button>
         </div>

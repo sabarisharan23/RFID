@@ -23,9 +23,16 @@ const AddCupboard: React.FC = () => {
     fetchRackOptions();
   }, [getAssetsByType]); // Dependency array includes getAssetsByParentId
 
+  function generateRandom10DigitNumber() {
+    // Generate a random number between 1000000000 and 9999999999
+    const min = 1000000000; // 10 digits minimum
+    const max = 9999999999; // 10 digits maximum
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
   const handleSave = () => {
     // Add save logic here
-    addAsset("01234567891", 23, { name: cupboardName, description: cupboardDescription }, selectedRack);
+    addAsset(`${generateRandom10DigitNumber}`, 23, { name: cupboardName, description: cupboardDescription }, selectedRack);
     console.log('Saved', { selectedRack, cupboardName, cupboardDescription });
     // Optionally, navigate to another page after saving
     navigate('/cupboards');
@@ -60,9 +67,6 @@ const AddCupboard: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <button className="bg-red-500 text-white px-2 py-2 rounded-full">
-                +
-              </button>
             </div>
           </div>
 
