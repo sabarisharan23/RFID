@@ -1,20 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAssetStore } from '../../store/store';
 
 const AddCupboard: React.FC = () => {
   const navigate = useNavigate();
-  const [cupboard, setCupboard] = useState('');
-  const [rack, setRack] = useState('');
+  const [selectedRack, setSelectedRack] = useState('');
+  const [cupboardName, setCupboardName] = useState('');
   const [cupboardDescription, setCupboardDescription] = useState('');
+  const { getAssetsByType, addAsset } = useAssetStore();
+  const [rackOptions, setRackOptions] = useState<any[]>([]); // Adjust the type as needed
+
+  useEffect(() => {
+    const fetchRackOptions = async () => {
+      try {
+        const options = await getAssetsByType(22); // Replace with the actual parentId
+        setRackOptions(options);
+      } catch (error) {
+        console.error('Error fetching rack options:', error);
+      }
+    };
+
+    fetchRackOptions();
+  }, [getAssetsByType]); // Dependency array includes getAssetsByParentId
 
   const handleSave = () => {
     // Add save logic here
-    console.log('Saved', { cupboard, rack, cupboardDescription });
+    addAsset("01234567891", 23, { name: cupboardName, description: cupboardDescription }, selectedRack);
+    console.log('Saved', { selectedRack, cupboardName, cupboardDescription });
+    // Optionally, navigate to another page after saving
+    navigate('/cupboards');
   };
 
   const handleBack = () => {
     navigate('/cupboards');
-   };
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -23,47 +42,55 @@ const AddCupboard: React.FC = () => {
       {/* Form */}
       <div className="bg-white mt-6 shadow rounded p-6">
         <div className="grid grid-cols-3 gap-6">
-          {/* Cupboard Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cupboard <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={cupboard}
-              onChange={(e) => setCupboard(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Cupboard"
-            />
-          </div>
-
-          {/* Rack Dropdown */}
+          {/* Rack Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Rack <span className="text-red-500">*</span>
             </label>
-            <select
-              value={rack}
-              onChange={(e) => setRack(e.target.value)}
+            <div className="flex items-center space-x-2 mt-1">
+              <select
+                value={selectedRack}
+                onChange={(e) => setSelectedRack(e.target.value)}
+                className="block w-full border border-gray-300 rounded p-2"
+              >
+                <option value="">Select a Rack</option>
+                {rackOptions.map((option) => (
+                  <option key={option.RFID} value={option.RFID}>
+                    {option.fields.name} - {option.fields.description}
+                  </option>
+                ))}
+              </select>
+              <button className="bg-red-500 text-white px-2 py-2 rounded-full">
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Cupboard Name Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Cupboard Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={cupboardName}
+              onChange={(e) => setCupboardName(e.target.value)}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
-            >
-              <option value="">Select Rack</option>
-              <option value="g-ty">g-ty</option>
-              <option value="rack 1">rack 1</option>
-            </select>
+              placeholder="Enter Cupboard Name"
+            />
           </div>
 
           {/* Cupboard Description Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Cupboard Description
+              Cupboard Description <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={cupboardDescription}
               onChange={(e) => setCupboardDescription(e.target.value)}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Description"
+              placeholder="Enter Cupboard Description"
             />
           </div>
         </div>

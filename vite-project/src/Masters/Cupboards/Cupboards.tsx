@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAssetStore } from '../../store/store';
 
-const CupboardTable: React.FC = () => {
+const CupboardsTable: React.FC = () => {
   const navigate = useNavigate();
-  const [entries, setEntries] = useState(10);
-  const [search, setSearch] = useState('');
-
-  const data = [
-    { cupboard: 'cup-1', rack: 'g-ty', description: 'gty-100' }
-  ];
+  const { getAssetsByType, getAssetByRFID } = useAssetStore();
+  const cupboards = getAssetsByType(23); // Fetch cupboards instead of racks
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="text-+++2xl font-semibold ">Cupboards</div>
+      {/* Navbar */}
+
+      {/* Page Title */}
+      <div className="text-3xl font-semibold mt-6">Cupboards</div>
 
       {/* Action Buttons */}
       <div className="flex space-x-4 mt-4">
@@ -26,12 +26,7 @@ const CupboardTable: React.FC = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <label htmlFor="entries" className="text-gray-600">Show</label>
-            <select
-              id="entries"
-              value={entries}
-              onChange={(e) => setEntries(Number(e.target.value))}
-              className="border border-gray-300 rounded p-1"
-            >
+            <select id="entries" className="border border-gray-300 rounded p-1">
               <option value="10">10</option>
               <option value="25">25</option>
               <option value="50">50</option>
@@ -43,8 +38,6 @@ const CupboardTable: React.FC = () => {
             <input
               type="text"
               id="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
               className="border border-gray-300 rounded p-1"
               placeholder="Search"
             />
@@ -55,31 +48,27 @@ const CupboardTable: React.FC = () => {
         <table className="w-full mt-4 border border-gray-300">
           <thead className="bg-gray-100 text-left">
             <tr>
-              <th className="p-2 border border-gray-300">Cupboard</th>
               <th className="p-2 border border-gray-300">Rack</th>
-              <th className="p-2 border border-gray-300">Description</th>
+              <th className="p-2 border border-gray-300">Cupboard Name</th>
+              <th className="p-2 border border-gray-300">Cupboard Description</th>
             </tr>
           </thead>
           <tbody>
-            {data
-              .filter((item) =>
-                item.cupboard.toLowerCase().includes(search.toLowerCase()) ||
-                item.rack.toLowerCase().includes(search.toLowerCase()) ||
-                item.description.toLowerCase().includes(search.toLowerCase())
-              )
-              .map((item, index) => (
-                <tr key={index} className="border-t">
-                  <td className="p-2 border border-gray-300">{item.cupboard}</td>
-                  <td className="p-2 border border-gray-300">{item.rack}</td>
-                  <td className="p-2 border border-gray-300">{item.description}</td>
-                </tr>
-              ))}
+            {cupboards.map((cupboard, index) => (
+              <tr className="border-t" key={index}>
+                <td className="p-2 border border-gray-300" rowSpan={cupboard.fields.length}>
+                  {getAssetByRFID(cupboard.parentId)?.fields.name}
+                </td>
+                <td className="p-2 border border-gray-300">{cupboard.fields.name}</td>
+                <td className="p-2 border border-gray-300">{cupboard.fields.description}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-          <span>Showing 1 to 1 of 1 entries</span>
+          <span>Showing 1 to 2 of 2 entries</span>
           <div className="flex space-x-4">
             <button className="px-3 py-1 border rounded">Previous</button>
             <button className="px-3 py-1 border rounded">1</button>
@@ -94,4 +83,4 @@ const CupboardTable: React.FC = () => {
   );
 };
 
-export default CupboardTable;
+export default CupboardsTable;
