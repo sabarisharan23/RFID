@@ -84,7 +84,56 @@ const AssetForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="bg-white mt-6 shadow rounded p-6">
-        <div className="grid grid-cols-3 gap-6">
+
+        {/* Render Dynamic Fields Based on Selected Asset Type */}
+        <div className="col-span-3 border border-gray-300 rounded p-4 mt-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Asset Details</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Asset Type Dropdown moved here */}
+            <div className="col-span-3">
+              <label className="block text-sm font-medium text-gray-700">
+                Asset Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedAssetTypeId}
+                onChange={(e) => {
+                  const typeId = parseInt(e.target.value);
+                  setSelectedAssetTypeId(typeId);
+                  const assetTypeSelected = assetType.find(at => at.id === typeId);
+                  if (assetTypeSelected) {
+                    setFields(assetTypeSelected.fields); // Update fields when asset type changes
+                  }
+                }}
+                className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
+              >
+                <option value="" disabled>Select Asset Type</option>
+                {assetType.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {formatName(type.name)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {Object.keys(fields).map((fieldKey) => (
+              <div key={fieldKey} className="max-w-[450px]">
+                <label className="block text-sm font-medium text-gray-700">
+                  {formatName(fieldKey)} {/* Format the label */}
+                </label>
+                <input
+                  type="text"
+                  value={fields[fieldKey]}
+                  onChange={(e) => handleFieldChange(fieldKey, e.target.value)}
+                  className="block w-full border border-gray-300 rounded p-2 mt-1"
+                  placeholder={`Enter ${formatName(fieldKey)}`} // Format placeholder as well
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Location Details Section */}
+        <div className="grid grid-cols-3 gap-6 mt-6">
           {/* Row Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -94,7 +143,7 @@ const AssetForm: React.FC = () => {
               value={selectedRowId}
               onChange={(e) => {
                 setSelectedRowId(e.target.value);
-                handleFieldChange('row', e.target.value); // Store row value in fields
+                
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
             >
@@ -115,8 +164,7 @@ const AssetForm: React.FC = () => {
             <select
               value={selectedRackId}
               onChange={(e) => {
-                setSelectedRackId(e.target.value);
-                handleFieldChange('rack', e.target.value); // Store rack value in fields
+                setSelectedRackId(e.target.value);// Store rack value in fields
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
               disabled={!selectedRowId} // Enable only if a row is selected
@@ -152,55 +200,8 @@ const AssetForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Render Dynamic Fields Based on Selected Asset Type */}
-        <div className="col-span-3 border border-gray-300 rounded p-4 mt-6">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Asset Details</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {/* Asset Type Dropdown moved here */}
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Asset Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={selectedAssetTypeId}
-                onChange={(e) => {
-                  const typeId = parseInt(e.target.value);
-                  setSelectedAssetTypeId(typeId);
-                  const assetTypeSelected = assetType.find(at => at.id === typeId);
-                  if (assetTypeSelected) {
-                    setFields(assetTypeSelected.fields); // Update fields when asset type changes
-                  }
-                }}
-                className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
-              >
-                <option value="" disabled>Select Asset Type</option>
-                {assetType.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {formatName(type.name)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            {Object.keys(fields).map((fieldKey) => (
-              <div key={fieldKey} className="max-w-[450px]">
-                <label className="block text-sm font-medium text-gray-700">
-                  {formatName(fieldKey)} {/* Format the label */}
-                </label>
-                <input
-                  type="text"
-                  value={fields[fieldKey]}
-                  onChange={(e) => handleFieldChange(fieldKey, e.target.value)}
-                  className="block w-full border border-gray-300 rounded p-2 mt-1"
-                  placeholder={`Enter ${formatName(fieldKey)}`} // Format placeholder as well
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* RFID Input moved to the last position */}
-        <div>
+        <div className="mt-6">
           <label className="block text-sm font-medium text-gray-700">
             RFID <span className="text-red-500">*</span>
           </label>
