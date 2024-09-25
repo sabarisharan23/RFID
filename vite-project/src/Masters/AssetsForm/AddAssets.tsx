@@ -16,6 +16,7 @@ const AssetForm: React.FC = () => {
   const [selectedRowId, setSelectedRowId] = useState('');
   const [racks, setRacks] = useState([]);
   const [selectedRackId, setSelectedRackId] = useState('');
+  const [selectedCupboardId, setSelectedCupboardId] = useState('');
   const [cupboards, setCupboards] = useState([]);
 
   // Fetch rows by parent ID
@@ -46,6 +47,7 @@ const AssetForm: React.FC = () => {
       if (selectedRackId) {
         const fetchedCupboards = await getAssetsByParentId(selectedRackId); // Fetch cupboards using selected rack ID
         setCupboards(fetchedCupboards);
+        setSelectedCupboardId(fetchedCupboards[0].RFID);
       }
     };
     fetchCupboards();
@@ -68,8 +70,8 @@ const AssetForm: React.FC = () => {
   };
 
   const handleSave = () => {
-    addAsset(rfid, selectedAssetTypeId, fields);
-    console.log('Asset added:', { rfid, selectedAssetTypeId, fields });
+    addAsset(rfid, selectedAssetTypeId, fields, selectedCupboardId);
+    console.log('Asset added:', { rfid, selectedAssetTypeId, fields, selectedCupboardId });
     navigate('/assets'); // Navigate back after saving
   };
 
@@ -164,7 +166,8 @@ const AssetForm: React.FC = () => {
             <select
               value={selectedRackId}
               onChange={(e) => {
-                setSelectedRackId(e.target.value);// Store rack value in fields
+                setSelectedRackId(e.target.value);
+              
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
               disabled={!selectedRowId} // Enable only if a row is selected
@@ -185,12 +188,13 @@ const AssetForm: React.FC = () => {
             </label>
             <select
               onChange={(e) => {
-                handleFieldChange('cupboard', e.target.value); // Store cupboard value in fields
+                console.log('Cupboard selected:', e.target.value);
+                setSelectedCupboardId(e.target.value);
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
               disabled={!selectedRackId} // Enable only if a rack is selected
             >
-              <option value="" disabled>Select Cupboard</option>
+              <option value={selectedCupboardId} disabled>Select Cupboard</option>
               {cupboards.map((cupboard) => (
                 <option key={cupboard.RFID} value={cupboard.RFID}>
                   {formatName(cupboard.fields.name)} {/* Assuming cupboard has a name property */}

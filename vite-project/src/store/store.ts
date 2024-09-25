@@ -414,7 +414,7 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       },
   ],
 
-  assets: [{RFID: "1234567890", type: 20, fields: {name:"Lab-1", description:"Lab-1 location"}, isAvailable: true,  children: ["1234567891"]}, {RFID: "1234567891", type: 21, fields: {name:"Row-1", description:"Row-1 location"}, isAvailable: true,  parentId: "1234567890"}, {RFID: "1234567892", type: 22, fields: {name:"Rack-1", description:"Rack-1 location"}, isAvailable: true, parentId: "1234567891", children: ["1234567893"]}, {RFID: "1234567893", type: 23, fields: {name:"Cupboard-1", description:"Cupboard-1 location"}, isAvailable: true, parentId: "1234567892"}],
+  assets: [{RFID: "1234567890", type: 20, fields: {name:"Lab-1", description:"Lab-1 location"}, isAvailable: true,  children: ["1234567891"]}, {RFID: "1234567891", type: 21, fields: {name:"Row-1", description:"Row-1 location"}, isAvailable: true,  parentId: "1234567890"}, {RFID: "1234567892", type: 22, fields: {name:"Rack-1", description:"Rack-1 location"}, isAvailable: true, parentId: "1234567891", children: ["1234567893"]}, {RFID: "1234567893", type: 23, fields: {name:"Cupboard-1", description:"Cupboard-1 location"}, isAvailable: true, parentId: "1234567892"}, {RFID: "1234567896", type: 23, fields: {name:"Cupboard-2", description:"Cupboard-2 location"}, isAvailable: true, parentId: "1234567892"}],
 
   rfids: [],
 
