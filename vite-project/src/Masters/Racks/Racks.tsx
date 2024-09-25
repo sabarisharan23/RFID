@@ -1,8 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAssetStore } from '../../store/store';
 
 const Racks: React.FC = () => {
   const navigate = useNavigate();
+  const {getAssetsByType, getAssetByRFID} = useAssetStore();
+  const racks = getAssetsByType(22);
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Navbar */}
@@ -51,16 +54,17 @@ const Racks: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-t">
-              <td className="p-2 border border-gray-300">capsule</td>
-              <td className="p-2 border border-gray-300">g-ty</td>
-              <td className="p-2 border border-gray-300">gra-ty</td>
-            </tr>
-            <tr className="border-t">
-              <td className="p-2 border border-gray-300">prison</td>
-              <td className="p-2 border border-gray-300">rack 1</td>
-              <td className="p-2 border border-gray-300">description for rack -1</td>
-            </tr>
+          {racks.map((rack, index) => (
+              
+                <tr className="border-t" >
+                    <td className="p-2 border border-gray-300" rowSpan={rack.fields.length}>
+                      {getAssetByRFID(rack.parentId)?.fields.name}
+                    </td>
+                  <td className="p-2 border border-gray-300">{rack.fields.name}</td>
+                  <td className="p-2 border border-gray-300">{rack.fields.description}</td>
+                </tr>
+              
+            ))}
           </tbody>
         </table>
 

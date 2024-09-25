@@ -32,7 +32,7 @@ interface AssetStore {
   Count: Count[]; // Array of counts corresponding to asset types
   assets: Asset[]; // List of assets with RFID
   rfids: string[]; 
-  getAssetsByParentId: (parentId: string) => Promise<never[]>;
+  getAssetsByParentId: (parentId: string) => Promise<Asset[]>;
   getTypeById: (typeId: number) => AssetType | undefined;
 
   // List of RFID strings
