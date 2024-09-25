@@ -31,7 +31,9 @@ interface AssetStore {
   assetType: AssetType[]; // Array of different asset types
   Count: Count[]; // Array of counts corresponding to asset types
   assets: Asset[]; // List of assets with RFID
-  rfids: string[]; // List of RFID strings
+  rfids: string[]; 
+  getAssetsByParentId: (parentId: string) => Promise<never[]>;
+  // List of RFID strings
 
   // CRUD operations
   addAsset: <T>(rfid: string, typeId: number, fields: T, parentId?:string, children?:string[]) => void;
@@ -71,7 +73,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       name: "clientsDetailsSection",
       fields: {
         clientName: "",
-        location: "",
         os: "",
         capacity: "",
         available: "",
@@ -93,7 +94,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       name: "switchesDetailsSection",
       fields: {
         switchesName: "",
-        location: "",
         capacity: "",
         available: "",
         purpose: "",
@@ -108,7 +108,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
         platform: "",
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         busyQuantity: ""
       }
@@ -121,7 +120,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
         platform: "",
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         length: ""
       }
@@ -132,7 +130,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       fields: {
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -143,7 +140,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       fields: {
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -153,8 +149,7 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       name: "battery",
       fields: {
         partNumber3x5: "",
-        mfgPn: "",
-        location: ""
+        mfgPn: ""
       }
     },
     {
@@ -162,8 +157,7 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       name: "fans",
       fields: {
         partNumber3x5: "",
-        mfgPn: "",
-        location: ""
+        mfgPn: ""
       }
     },
     {
@@ -171,7 +165,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       name: "usbPendrives",
       fields: {
         capacity: "",
-        location: "",
         vendor: ""
       }
     },
@@ -181,7 +174,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       fields: {
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -192,7 +184,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       fields: {
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -203,7 +194,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       fields: {
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -214,7 +204,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       fields: {
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -225,7 +214,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       fields: {
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -237,7 +225,6 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
         sfpType: "",
         partNumber3x5: "",
         mfgPn: "",
-        location: "",
         vendor: "",
         capacity: ""
       }
@@ -251,38 +238,39 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       }
     },
     {
-        id: 20,
-        name: "location",
-        fields: {
-          name: "",
-          description: ""
-        }
-      },
-      {
-        id: 21,
-        name: "row",
-        fields: {
-          name: "",
-          description: ""
-        }
-      },
-      {
-        id: 22,
-        name: "rack",
-        fields: {
-          name: "",
-          description: ""
-        }
-      },
-      {
-        id: 23,
-        name: "cupboard",
-        fields: {
-          name: "",
-          description: ""
-        }
+      id: 20,
+      name: "location",
+      fields: {
+        name: "",
+        description: ""
       }
+    },
+    {
+      id: 21,
+      name: "row",
+      fields: {
+        name: "",
+        description: ""
+      }
+    },
+    {
+      id: 22,
+      name: "rack",
+      fields: {
+        name: "",
+        description: ""
+      }
+    },
+    {
+      id: 23,
+      name: "cupboard",
+      fields: {
+        name: "",
+        description: ""
+      }
+    }
   ],
+  
   Count:  [
     {
       id: 1,
@@ -424,14 +412,14 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
       },
   ],
 
-  assets: [],
+  assets: [{RFID: "1234567890", type: 20, fields: {name:"Lab-1", description:"Lab-1 location"}, isAvailable: true,  children: ["1234567891"]}, {RFID: "1234567891", type: 21, fields: {name:"Row-1", description:"Row-1 location"}, isAvailable: true,  parentId: "1234567890"}, {RFID: "1234567892", type: 22, fields: {name:"Rack-1", description:"Rack-1 location"}, isAvailable: true, parentId: "1234567891", children: ["1234567893"]}, {RFID: "1234567893", type: 23, fields: {name:"Cupboard-1", description:"Cupboard-1 location"}, isAvailable: true, parentId: "1234567892"}],
 
   rfids: [],
 
   // CRUD operations for assets
   addAsset: (rfid, typeId, fields, parentId, children) => {
     const assetType = get().assetType.find(at => at.id === typeId);
-    if (!assetType) return; // assetType with the given typeId not found
+    if (!assetType) return; 
 
     const newAsset: Asset = {
       RFID: rfid,
@@ -490,4 +478,7 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
   getAssetsByType: (typeId) => {
     return get().assets.filter((asset) => asset.type === typeId);
   },
+  getAssetsByParentId: async (parentId: string) => {
+    return get().assets.filter((asset) => asset.parentId === parentId);
+  }
 }));
