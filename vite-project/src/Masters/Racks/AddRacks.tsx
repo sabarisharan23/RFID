@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAssetStore } from '../../store/store';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAssetStore } from "../../store/store";
+import { HiPlusCircle } from "react-icons/hi";
 
 const RackForm: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedRow, setSelectedRow] = useState('');
-  const [rackName, setRackName] = useState('');
-  const [rackDescription, setRackDescription] = useState('');
-  const { getAssetsByParentId,getAssetByRFID, addAsset } = useAssetStore();
+  const [selectedRow, setSelectedRow] = useState("");
+  const [rackName, setRackName] = useState("");
+  const [rackDescription, setRackDescription] = useState("");
+  const { getAssetsByParentId, getAssetByRFID, addAsset } = useAssetStore();
   const [rowOptions, setRowOptions] = useState<any[]>([]); // Adjust the type as needed
 
   useEffect(() => {
     const fetchRowOptions = async () => {
       try {
-        const options = await getAssetsByParentId('1234567890'); // Replace with the actual parentId
+        const options = await getAssetsByParentId("1234567890"); // Replace with the actual parentId
         setRowOptions(options);
       } catch (error) {
-        console.error('Error fetching row options:', error);
+        console.error("Error fetching row options:", error);
       }
     };
 
@@ -25,14 +26,19 @@ const RackForm: React.FC = () => {
 
   const handleSave = () => {
     // Add save logic here
-    addAsset("01234567891", 22, { name: rackName, description: rackDescription }, selectedRow);
-    console.log('Saved', { selectedRow, rackName, rackDescription });
+    addAsset(
+      "01234567891",
+      22,
+      { name: rackName, description: rackDescription },
+      selectedRow
+    );
+    console.log("Saved", { selectedRow, rackName, rackDescription });
     // Optionally, navigate to another page after saving
-    navigate('/racks');
+    navigate("/racks");
   };
 
   const handleBack = () => {
-    navigate('/racks');
+    navigate("/racks");
   };
 
   return (
@@ -60,9 +66,7 @@ const RackForm: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <button className="bg-red-500 text-white px-2 py-2 rounded-full" onClick={() => navigate('/add-row')}>
-                +
-              </button>
+             <HiPlusCircle className="text-4xl cursor-pointer "  onClick={() => navigate("/add-row")}/>
             </div>
           </div>
 
@@ -113,7 +117,6 @@ const RackForm: React.FC = () => {
       </div>
 
       {/* Footer */}
-      
     </div>
   );
 };
