@@ -33,6 +33,8 @@ interface AssetStore {
   assets: Asset[]; // List of assets with RFID
   rfids: string[]; 
   getAssetsByParentId: (parentId: string) => Promise<never[]>;
+  getTypeById: (typeId: number) => AssetType | undefined;
+
   // List of RFID strings
 
   // CRUD operations
@@ -49,227 +51,227 @@ interface AssetStore {
 
 // Zustand store implementation
 export const useAssetStore = create<AssetStore>((set, get) => ({
-  assetType: [
-    {
-      id: 1,
-      name: "filer",
-      fields: {
-        system: "",
-        health: "",
-        ds: "",
-        ioConfig: ""
-      }
-    },
-    {
-      id: 2,
-      name: "clientsSummarySection",
-      fields: {
-        clients: "",
-        vendor: ""
-      }
-    },
-    {
-      id: 3,
-      name: "clientsDetailsSection",
-      fields: {
-        clientName: "",
-        os: "",
-        capacity: "",
-        available: "",
-        reservedOwner: "",
-        purpose: "",
-        warrantyDetails: ""
-      }
-    },
-    {
-      id: 4,
-      name: "switchSummarySection",
-      fields: {
-        switches: "",
-        vendor: ""
-      }
-    },
-    {
-      id: 5,
-      name: "switchesDetailsSection",
-      fields: {
-        switchesName: "",
-        capacity: "",
-        available: "",
-        purpose: "",
-        warrantyDetails: ""
-      }
-    },
-    {
-      id: 6,
-      name: "hbaIoCard",
-      fields: {
-        hbaCardDetails: "",
-        platform: "",
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        busyQuantity: ""
-      }
-    },
-    {
-      id: 7,
-      name: "cables",
-      fields: {
-        cablesTypeClass: "",
-        platform: "",
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        length: ""
-      }
-    },
-    {
-      id: 8,
-      name: "dimm",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 9,
-      name: "nvdimm",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 10,
-      name: "battery",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: ""
-      }
-    },
-    {
-      id: 11,
-      name: "fans",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: ""
-      }
-    },
-    {
-      id: 12,
-      name: "usbPendrives",
-      fields: {
-        capacity: "",
-        vendor: ""
-      }
-    },
-    {
-      id: 13,
-      name: "ssdDrives",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 14,
-      name: "hddDrives",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 15,
-      name: "flashCache",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 16,
-      name: "bootMedia",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 17,
-      name: "psu",
-      fields: {
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 18,
-      name: "sfps",
-      fields: {
-        sfpType: "",
-        partNumber3x5: "",
-        mfgPn: "",
-        vendor: "",
-        capacity: ""
-      }
-    },
-    {
-      id: 19,
-      name: "tools",
-      fields: {
-        toolName: "",
-        vendor: ""
-      }
-    },
-    {
-      id: 20,
-      name: "location",
-      fields: {
-        name: "",
-        description: ""
-      }
-    },
-    {
-      id: 21,
-      name: "row",
-      fields: {
-        name: "",
-        description: ""
-      }
-    },
-    {
-      id: 22,
-      name: "rack",
-      fields: {
-        name: "",
-        description: ""
-      }
-    },
-    {
-      id: 23,
-      name: "cupboard",
-      fields: {
-        name: "",
-        description: ""
-      }
-    }
-  ],
+    assetType: [
+        {
+        id: 1,
+        name: "filer",
+        fields: {
+            system: "",
+            health: "",
+            ds: "",
+            ioConfig: ""
+        }
+        },
+        {
+        id: 2,
+        name: "clientsSummarySection",
+        fields: {
+            clients: "",
+            vendor: ""
+        }
+        },
+        {
+        id: 3,
+        name: "clientsDetailsSection",
+        fields: {
+            clientName: "",
+            os: "",
+            capacity: "",
+            available: "",
+            reservedOwner: "",
+            purpose: "",
+            warrantyDetails: ""
+        }
+        },
+        {
+        id: 4,
+        name: "switchSummarySection",
+        fields: {
+            switches: "",
+            vendor: ""
+        }
+        },
+        {
+        id: 5,
+        name: "switchesDetailsSection",
+        fields: {
+            switchesName: "",
+            capacity: "",
+            available: "",
+            purpose: "",
+            warrantyDetails: ""
+        }
+        },
+        {
+        id: 6,
+        name: "hbaIoCard",
+        fields: {
+            hbaCardDetails: "",
+            platform: "",
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            busyQuantity: ""
+        }
+        },
+        {
+        id: 7,
+        name: "cables",
+        fields: {
+            cablesTypeClass: "",
+            platform: "",
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            length: ""
+        }
+        },
+        {
+        id: 8,
+        name: "dimm",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 9,
+        name: "nvdimm",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 10,
+        name: "battery",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: ""
+        }
+        },
+        {
+        id: 11,
+        name: "fans",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: ""
+        }
+        },
+        {
+        id: 12,
+        name: "usbPendrives",
+        fields: {
+            capacity: "",
+            vendor: ""
+        }
+        },
+        {
+        id: 13,
+        name: "ssdDrives",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 14,
+        name: "hddDrives",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 15,
+        name: "flashCache",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 16,
+        name: "bootMedia",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 17,
+        name: "psu",
+        fields: {
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 18,
+        name: "sfps",
+        fields: {
+            sfpType: "",
+            partNumber3x5: "",
+            mfgPn: "",
+            vendor: "",
+            capacity: ""
+        }
+        },
+        {
+        id: 19,
+        name: "tools",
+        fields: {
+            toolName: "",
+            vendor: ""
+        }
+        },
+        {
+        id: 20,
+        name: "location",
+        fields: {
+            name: "",
+            description: ""
+        }
+        },
+        {
+        id: 21,
+        name: "row",
+        fields: {
+            name: "",
+            description: ""
+        }
+        },
+        {
+        id: 22,
+        name: "rack",
+        fields: {
+            name: "",
+            description: ""
+        }
+        },
+        {
+        id: 23,
+        name: "cupboard",
+        fields: {
+            name: "",
+            description: ""
+        }
+        }
+    ],
   
   Count:  [
     {
@@ -477,6 +479,9 @@ export const useAssetStore = create<AssetStore>((set, get) => ({
   // Retrieve all assets of a specific type
   getAssetsByType: (typeId) => {
     return get().assets.filter((asset) => asset.type === typeId);
+  },
+   getTypeById: (typeId) => {
+    return get().assetType.find((type) => type.id === typeId);
   },
   getAssetsByParentId: async (parentId: string) => {
     return get().assets.filter((asset) => asset.parentId === parentId);

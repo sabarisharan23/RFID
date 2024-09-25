@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAssetStore } from '../../store/store';
 
 const AssetTable: React.FC = () => {
   const navigate = useNavigate();
+  const {assets,getTypeById, getAssetByRFID} = useAssetStore();
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Action Buttons */}
@@ -50,27 +52,23 @@ const AssetTable: React.FC = () => {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border border-gray-300 text-left">Asset Name</th>
-              <th className="p-2 border border-gray-300 text-left">MFG PN</th>
-              <th className="p-2 border border-gray-300 text-left">Item ID</th>
-              <th className="p-2 border border-gray-300 text-left">Model Number</th>
-              <th className="p-2 border border-gray-300 text-left">Capacity</th>
-              <th className="p-2 border border-gray-300 text-left">Tag ID</th>
-              <th className="p-2 border border-gray-300 text-left">Type</th>
-              <th className="p-2 border border-gray-300 text-left">Rack</th>
+              <th className="p-2 border border-gray-300 text-left">RFID</th>
+              <th className="p-2 border border-gray-300 text-left">TYPE</th>
+              <th className="p-2 border border-gray-300 text-left">Location</th>
+              <th className="p-2 border border-gray-300 text-left">Available</th>
             </tr>
           </thead>
           <tbody>
             {/* Example Row */}
-            <tr>
-              <td className="p-2 border border-gray-300">RAM</td>
-              <td className="p-2 border border-gray-300">22331asadasdadad</td>
-              <td className="p-2 border border-gray-300">-</td>
-              <td className="p-2 border border-gray-300">-</td>
-              <td className="p-2 border border-gray-300">12GB</td>
-              <td className="p-2 border border-gray-300">123333434545Jdikas</td>
-              <td className="p-2 border border-gray-300">Asset</td>
-              <td className="p-2 border border-gray-300">-</td>
-            </tr>
+            {assets.map((asset) => (
+              <tr key={asset.id}>
+                <td className="p-2 border border-gray-300">{asset.fields.name || getTypeById(asset.type)?.name}</td>
+                <td className="p-2 border border-gray-300">{asset.RFID}</td>
+                <td className="p-2 border border-gray-300">{getTypeById(asset.type)?.name}</td>
+                <td className="p-2 border border-gray-300">{getAssetByRFID(asset.parentId)?.fields.name || "-"}</td>  
+                <td className="p-2 border border-gray-300">{asset.isAvailable? "Yes" : "No"}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
