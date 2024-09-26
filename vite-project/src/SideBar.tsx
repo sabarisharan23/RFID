@@ -18,6 +18,7 @@ const Sidebar: React.FC = () => {
         { label: 'Rack', route: '/racks' },
         { label: 'Cupboard', route: '/cupboards' },
         { label: 'Assets', route: '/assets' },
+        { label: 'Asset Search', route: '/asset-search' }, // Added Asset Search
       ],
     },
     {
