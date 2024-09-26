@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const DisableRFIDTag: React.FC = () => {
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
   const navigate = useNavigate();
 
   const handleDisable = () => {
     // Add disable logic here
-    console.log('Notes:', notes);
+    console.log("Notes:", notes);
   };
 
   const handleBack = () => {
-navigate('/RFIDTags');
-};
+    navigate("/RFIDTags");
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -25,7 +25,9 @@ navigate('/RFIDTags');
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border border-gray-300 text-left">MFG PN</th>
-              <th className="p-2 border border-gray-300 text-left">Asset Name</th>
+              <th className="p-2 border border-gray-300 text-left">
+                Asset Name
+              </th>
               <th className="p-2 border border-gray-300 text-left">Capacity</th>
               <th className="p-2 border border-gray-300 text-left">ItemID</th>
             </tr>
@@ -59,13 +61,13 @@ navigate('/RFIDTags');
         <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={handleBack}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
           >
             Back
           </button>
           <button
             onClick={handleDisable}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#635bff] text-white px-4 py-2 rounded"
           >
             Disable
           </button>

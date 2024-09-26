@@ -1,14 +1,225 @@
-import React from 'react';
+// Dashboard.tsx
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Bar } from 'react-chartjs-2';
+import { useAssetStore } from "../store/store";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate(); // For navigation
+  const {
+    assets,
+    counts,
+    assetMovements,
+    auditLogs,
+    getAssetByRFID,
+    getAssetsByType,
+    getAssetMovementsByRFID,
+    getAuditLogsByDate,
+    getAssetsByParentId,
+  } = useAssetStore();
+
+  // State to hold counts
+  const [rowCount, setRowCount] = useState(0);
+  const [rackCount, setRackCount] = useState(0);
+  const [cupboardCount, setCupboardCount] = useState(0);
+  const [assetCount, setAssetCount] = useState(0);
+  const [lab1AssetCount, setLab1AssetCount] = useState(0);
+  const [lab1AssetMovement, setLab1AssetMovement] = useState(0);
+  const [auditToday, setAuditToday] = useState(0);
+  
+  // Fetch counts on component mount and when dependencies change
+  useEffect(() => {
+    // Fetch Rows count (typeId: 21)
+    const row = counts.find(c => c.id === 21);
+    setRowCount(row ? row.totalQuantity : 0);
+
+    // Fetch Racks count (typeId: 22)
+    const rack = counts.find(c => c.id === 22);
+    setRackCount(rack ? rack.totalQuantity : 0);
+
+    // Fetch Cupboards count (typeId: 23)
+    const cupboard = counts.find(c => c.id === 23);
+    setCupboardCount(cupboard ? cupboard.totalQuantity : 0);
+
+    // Fetch Assets count (sum counts for typeIds 1-19)
+    const assetTypes = counts.filter(c => c.id >=1 && c.id <=19);
+    const totalAssets = assetTypes.reduce((acc, curr) => acc + curr.totalQuantity, 0);
+    setAssetCount(totalAssets);
+
+    // Fetch LAB-1 asset count
+    const lab = getAssetByRFID("1234567890"); // Assuming "1234567890" is LAB-1 RFID
+    if (lab) {
+      // Get all assets under LAB-1
+      const rows = getAssetsByParentId(lab.RFID);
+      let totalAssetsUnderLab = 0;
+      rows.forEach(row => {
+        const racks = getAssetsByParentId(row.RFID);
+        racks.forEach(rack => {
+          const cupboards = getAssetsByParentId(rack.RFID);
+          totalAssetsUnderLab += cupboards.length;
+        });
+      });
+      setLab1AssetCount(totalAssetsUnderLab);
+    } else {
+      setLab1AssetCount(0);
+    }
+
+    // Fetch LAB-1 asset movements in this month
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-indexed
+    const currentYear = now.getFullYear();
+    let movementsThisMonth = 0;
+    const labRFIDs = ["1234567890", "1234567891", "1234567892", "1234567893", "1234567896"]; // Adjust as needed
+    labRFIDs.forEach(rfid => {
+      const movements = getAssetMovementsByRFID(rfid);
+      movements.forEach(movement => {
+        const movementDate = new Date(movement.date);
+        if (movementDate.getMonth() === currentMonth && movementDate.getFullYear() === currentYear) {
+          movementsThisMonth +=1;
+        }
+      });
+    });
+    setLab1AssetMovement(movementsThisMonth);
+
+    // Fetch audit logs for today
+    const today = new Date();
+    const auditsToday = getAuditLogsByDate(today).length;
+    setAuditToday(auditsToday);
+  }, [counts, assets, assetMovements, auditLogs, getAssetByRFID, getAssetsByType, getAssetMovementsByRFID, getAuditLogsByDate, getAssetsByParentId]);
+
+  // Data for Asset Movement Tracking Chart
+  const [movementChartData, setMovementChartData] = useState<any>({});
+
+  useEffect(() => {
+    // Example: Monthly Asset Movement Tracking for the past 6 months
+    const now = new Date();
+    const labels = [];
+    const totalMovements = [];
+    const equipmentMovements = [];
+
+    for (let i = 5; i >=0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = date.toLocaleString('default', { month: 'short' });
+      const year = date.getFullYear();
+      labels.push(`${month} ${year}`);
+
+      // Total Movements
+      const movements = assetMovements.filter(movement => {
+        return movement.date.getMonth() === date.getMonth() && movement.date.getFullYear() === date.getFullYear();
+      }).length;
+      totalMovements.push(movements);
+
+      // Equipment Movements (assuming movementType 'out' is equipment)
+      const equipment = assetMovements.filter(movement => {
+        return movement.date.getMonth() === date.getMonth() && movement.date.getFullYear() === date.getFullYear() && movement.movementType === 'out';
+      }).length;
+      equipmentMovements.push(equipment);
+    }
+
+    setMovementChartData({
+      labels,
+      datasets: [
+        {
+          label: 'Total Asset Movement',
+          data: totalMovements,
+          backgroundColor: 'gray',
+        },
+        {
+          label: 'Equipment Movement',
+          data: equipmentMovements,
+          backgroundColor: '#635bff',
+        },
+      ],
+    });
+  }, [assetMovements]);
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Navbar */}
-      
+      {/* If you have a navbar component, include it here */}
+
       {/* Dashboard Header */}
       <div className="text-3xl font-semibold mt-6">Dashboard</div>
 
-      {/* Main Cards */}
+      {/* Counts Cards */}
+      <div className="grid grid-cols-4 gap-4 mt-6">
+        {/* Rows Count */}
+        <div className="bg-white p-4 shadow rounded">
+          <div className="flex justify-between items-center">
+            <div className="text-xl font-semibold">Rows</div>
+            <div className="bg-blue-200 text-blue-800 py-1 px-3 rounded-full text-sm">
+              Total
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="text-3xl font-bold">{rowCount}</div>
+            <div className="text-gray-500">Total Rows</div>
+          </div>
+        </div>
+
+        {/* Racks Count */}
+        <div className="bg-white p-4 shadow rounded">
+          <div className="flex justify-between items-center">
+            <div className="text-xl font-semibold">Racks</div>
+            <div className="bg-yellow-200 text-yellow-800 py-1 px-3 rounded-full text-sm">
+              Total
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="text-3xl font-bold">{rackCount}</div>
+            <div className="text-gray-500">Total Racks</div>
+          </div>
+        </div>
+
+        {/* Cupboards Count */}
+        <div className="bg-white p-4 shadow rounded">
+          <div className="flex justify-between items-center">
+            <div className="text-xl font-semibold">Cupboards</div>
+            <div className="bg-purple-200 text-purple-800 py-1 px-3 rounded-full text-sm">
+              Total
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="text-3xl font-bold">{cupboardCount}</div>
+            <div className="text-gray-500">Total Cupboards</div>
+          </div>
+        </div>
+
+        {/* Assets Count */}
+        <div className="bg-white p-4 shadow rounded">
+          <div className="flex justify-between items-center">
+            <div className="text-xl font-semibold">Assets</div>
+            <div className="bg-green-200 text-green-800 py-1 px-3 rounded-full text-sm">
+              Total
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="text-3xl font-bold">{assetCount}</div>
+            <div className="text-gray-500">Total Assets</div>
+          </div>
+        </div>
+      </div>
+
+      {/* LAB-1 Asset Movement and Count */}
       <div className="grid grid-cols-2 gap-4 mt-6">
         {/* LAB-1 Card */}
         <div className="bg-white p-4 shadow rounded">
@@ -19,9 +230,9 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-3xl font-bold">0</div>
+            <div className="text-3xl font-bold">{lab1AssetMovement}</div>
             <div className="text-gray-500">Asset Movement</div>
-            <div className="mt-4 text-3xl font-bold">1</div>
+            <div className="mt-4 text-3xl font-bold">{lab1AssetCount}</div>
             <div className="text-gray-500">Asset Count</div>
           </div>
         </div>
@@ -35,9 +246,12 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-3xl font-bold">0</div>
+            <div className="text-3xl font-bold">{auditToday}</div>
             <div className="text-gray-500">Audit</div>
-            <button className="mt-4 bg-gray-100 text-gray-700 px-4 py-2 rounded">
+            <button
+              className="mt-4 bg-gray-100 text-gray-700 px-4 py-2 rounded"
+              onClick={() => navigate("/audit")}
+            >
               More Info
             </button>
           </div>
@@ -58,19 +272,37 @@ const Dashboard: React.FC = () => {
             <div>Total Asset Movement</div>
           </div>
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-green-600 mr-2"></div>
+            <div className="w-4 h-4 bg-[#635bff] mr-2"></div>
             <div>Equipment Movement</div>
           </div>
+        </div>
+
+        {/* Chart */}
+        <div className="mt-4">
+          {movementChartData.labels && movementChartData.labels.length > 0 ? (
+            <Bar
+              data={movementChartData}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'top' as const,
+                  },
+                  title: {
+                    display: false,
+                    text: 'Asset Movement Tracking',
+                  },
+                },
+              }}
+            />
+          ) : (
+            <div>No movement data available.</div>
+          )}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-gray-500 text-sm text-center">
-        © 2024 www.mindteck.com
-      </div>
-      <div className="text-gray-500 text-sm text-center">
-        Version : 1.0.1 June 04, 2020
-      </div>
+      {/* If you have a footer component, include it here */}
     </div>
   );
 };

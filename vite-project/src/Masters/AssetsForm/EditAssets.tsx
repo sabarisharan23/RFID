@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAssetStore } from '../../store/store';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAssetStore } from "../../store/store";
 
 // Define types for AssetField and Asset
 interface AssetFields {
@@ -22,21 +22,24 @@ interface AssetType {
 
 const EditAssets: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Get RFID or asset ID from URL (for editing mode)
-  const { assetType, updateAsset, getAssetByRFID, getAssetsByParentId } = useAssetStore();
+  const { assetType, updateAsset, getAssetByRFID, getAssetsByParentId } =
+    useAssetStore();
   const navigate = useNavigate();
 
   // Form state
-  const [rfid, setRfid] = useState(id || ''); // Set RFID from URL if in edit mode
-  const [selectedAssetTypeId, setSelectedAssetTypeId] = useState<number>(assetType[0]?.id || 0);
+  const [rfid, setRfid] = useState(id || ""); // Set RFID from URL if in edit mode
+  const [selectedAssetTypeId, setSelectedAssetTypeId] = useState<number>(
+    assetType[0]?.id || 0
+  );
   const [fields, setFields] = useState<AssetFields>({});
 
   // States for dropdown options
   const [rows, setRows] = useState<Asset[]>([]);
-  const [selectedRowId, setSelectedRowId] = useState('');
+  const [selectedRowId, setSelectedRowId] = useState("");
   const [racks, setRacks] = useState<Asset[]>([]);
-  const [selectedRackId, setSelectedRackId] = useState('');
+  const [selectedRackId, setSelectedRackId] = useState("");
   const [cupboards, setCupboards] = useState<Asset[]>([]);
-  const [selectedCupboardId, setSelectedCupboardId] = useState('');
+  const [selectedCupboardId, setSelectedCupboardId] = useState("");
 
   // Load asset data if editing (id is present)
   useEffect(() => {
@@ -49,9 +52,9 @@ const EditAssets: React.FC = () => {
           setFields(fetchedAsset.fields);
 
           let cupboardId = fetchedAsset.parentId;
-          let rackId = '';
-          let rowId = '';
-          const labId = '1234567890'; // Lab's RFID
+          let rackId = "";
+          let rowId = "";
+          const labId = "1234567890"; // Lab's RFID
 
           // Set selectedCupboardId
           if (cupboardId) {
@@ -96,7 +99,7 @@ const EditAssets: React.FC = () => {
   // Fetch rows on component mount (for creating a new asset)
   useEffect(() => {
     const fetchRows = async () => {
-      const labId = '1234567890'; // Lab's RFID
+      const labId = "1234567890"; // Lab's RFID
       const fetchedRows = await getAssetsByParentId(labId);
       setRows(fetchedRows);
     };
@@ -132,7 +135,7 @@ const EditAssets: React.FC = () => {
   // Utility function to format names
   const formatName = (name: string) => {
     return name
-      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .replace(/([A-Z])/g, " $1") // Add space before capital letters
       .trim() // Remove any leading/trailing whitespace
       .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
   };
@@ -149,28 +152,36 @@ const EditAssets: React.FC = () => {
     if (id) {
       // If an id is present, update the existing asset
       updateAsset(rfid, fields, selectedCupboardId);
-      console.log('Asset updated:', { rfid, selectedAssetTypeId, fields, selectedCupboardId });
+      console.log("Asset updated:", {
+        rfid,
+        selectedAssetTypeId,
+        fields,
+        selectedCupboardId,
+      });
     }
-    navigate('/assets'); // Navigate back after saving
+    navigate("/assets"); // Navigate back after saving
   };
 
   const handleBack = () => {
-    navigate('/assets');
+    navigate("/assets");
   };
 
   const handleScan = () => {
-    console.log('Scan button clicked'); // Placeholder for actual scanning logic
+    console.log("Scan button clicked"); // Placeholder for actual scanning logic
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-2xl font-semibold pb-2">
-        {id ? 'Edit Asset' : 'Add Asset'} {/* Change title based on whether it's edit or add */}
+        {id ? "Edit Asset" : "Add Asset"}{" "}
+        {/* Change title based on whether it's edit or add */}
       </h1>
       <div className="bg-white mt-6 shadow rounded p-6">
         {/* Render Dynamic Fields Based on Selected Asset Type */}
         <div className="col-span-3 border border-gray-300 rounded p-4 mt-6">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Asset Details</h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Asset Details
+          </h2>
           <div className="grid grid-cols-3 gap-4">
             {/* Asset Type Dropdown moved here */}
             <div className="col-span-3">
@@ -182,7 +193,9 @@ const EditAssets: React.FC = () => {
                 onChange={(e) => {
                   const typeId = parseInt(e.target.value);
                   setSelectedAssetTypeId(typeId);
-                  const assetTypeSelected = assetType.find((at) => at.id === typeId);
+                  const assetTypeSelected = assetType.find(
+                    (at) => at.id === typeId
+                  );
                   if (assetTypeSelected) {
                     setFields(assetTypeSelected.fields); // Update fields when asset type changes
                   }
@@ -229,8 +242,8 @@ const EditAssets: React.FC = () => {
               value={selectedRowId}
               onChange={(e) => {
                 setSelectedRowId(e.target.value);
-                setSelectedRackId('');
-                setSelectedCupboardId('');
+                setSelectedRackId("");
+                setSelectedCupboardId("");
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
             >
@@ -239,7 +252,8 @@ const EditAssets: React.FC = () => {
               </option>
               {rows.map((row) => (
                 <option key={row.RFID} value={row.RFID}>
-                  {formatName(row.fields.name)} {/* Assuming row has a name property */}
+                  {formatName(row.fields.name)}{" "}
+                  {/* Assuming row has a name property */}
                 </option>
               ))}
             </select>
@@ -247,12 +261,14 @@ const EditAssets: React.FC = () => {
 
           {/* Rack Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Rack</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Rack
+            </label>
             <select
               value={selectedRackId}
               onChange={(e) => {
                 setSelectedRackId(e.target.value);
-                setSelectedCupboardId('');
+                setSelectedCupboardId("");
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
               disabled={!selectedRowId} // Enable only if a row is selected
@@ -262,7 +278,8 @@ const EditAssets: React.FC = () => {
               </option>
               {racks.map((rack) => (
                 <option key={rack.RFID} value={rack.RFID}>
-                  {formatName(rack.fields.name)} {/* Assuming rack has a name property */}
+                  {formatName(rack.fields.name)}{" "}
+                  {/* Assuming rack has a name property */}
                 </option>
               ))}
             </select>
@@ -270,11 +287,13 @@ const EditAssets: React.FC = () => {
 
           {/* Cupboard Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Cupboard</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Cupboard
+            </label>
             <select
               value={selectedCupboardId}
               onChange={(e) => {
-                console.log('Cupboard selected:', e.target.value);
+                console.log("Cupboard selected:", e.target.value);
                 setSelectedCupboardId(e.target.value);
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
@@ -285,7 +304,8 @@ const EditAssets: React.FC = () => {
               </option>
               {cupboards.map((cupboard) => (
                 <option key={cupboard.RFID} value={cupboard.RFID}>
-                  {formatName(cupboard.fields.name)} {/* Assuming cupboard has a name property */}
+                  {formatName(cupboard.fields.name)}{" "}
+                  {/* Assuming cupboard has a name property */}
                 </option>
               ))}
             </select>
@@ -308,7 +328,7 @@ const EditAssets: React.FC = () => {
             />
             <button
               onClick={handleScan}
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              className="bg-[#6C5CE7] hover:bg-[#5B4BCE] text-white py-2 px-4 rounded"
               disabled // Disable scan button during edit
             >
               Scan
@@ -320,13 +340,13 @@ const EditAssets: React.FC = () => {
         <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={handleBack}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
           >
             Back
           </button>
           <button
             onClick={handleSave}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#635bff] text-white px-4 py-2 rounded"
           >
             Update {/* Since this is EditAssets, button text is 'Update' */}
           </button>

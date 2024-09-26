@@ -1,16 +1,39 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAssetStore } from '../../store/store';
-import * as XLSX from 'xlsx';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAssetStore } from "../../store/store";
+import * as XLSX from "xlsx";
 
 const AssetTable: React.FC = () => {
   const navigate = useNavigate();
   const { assets, getTypeById, getAssetByRFID } = useAssetStore();
+  const [searchQuery, setSearchQuery] = useState("");
 
-
-  function downloadTableAsExcel(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
-    throw new Error('Function not implemented.');
+  function downloadTableAsExcel(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): void {
+    throw new Error("Function not implemented.");
   }
+
+  // List of types to exclude
+  const typesToExclude = ["location", "row", "rack", "cupboard"];
+
+  // Filter assets to exclude specific types and apply search
+  const filteredAssets = assets
+    .filter((asset) => {
+      const typeName = getTypeById(asset.type)?.name.toLowerCase() || "";
+      // Exclude assets of type 'location', 'row', 'rack', 'cupboard'
+      return !typesToExclude.includes(typeName);
+    })
+    .filter((asset) => {
+      const name = asset.fields.name || getTypeById(asset.type)?.name || "";
+      const rfid = asset.RFID || "";
+      const typeName = getTypeById(asset.type)?.name || "";
+      const location = getAssetByRFID(asset.parentId)?.fields.name || "-";
+      const available = asset.isAvailable ? "Yes" : "No";
+
+      const searchString = `${name} ${rfid} ${typeName} ${location} ${available}`.toLowerCase();
+      return searchString.includes(searchQuery.toLowerCase());
+    });
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -18,9 +41,18 @@ const AssetTable: React.FC = () => {
       <div>
         <h1 className="text-2xl font-semibold pb-4">Assets</h1>
         <div className="space-x-4 pb-6">
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-assets')}>Add</button>
-          {/* <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-assets')}>Edit</button> */}
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={downloadTableAsExcel}>Excel</button>
+          <button
+            className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
+            onClick={() => navigate("/add-assets")}
+          >
+            Add
+          </button>
+          <button
+            className="bg-[#F39C12] hover:bg-[#E67E22] text-white py-2 px-4 rounded"
+            onClick={downloadTableAsExcel}
+          >
+            Excel
+          </button>
         </div>
       </div>
 
@@ -29,7 +61,9 @@ const AssetTable: React.FC = () => {
         {/* Table Filter */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
-            <label htmlFor="entries" className="mr-2  text-gray-600">Show</label>
+            <label htmlFor="entries" className="mr-2 text-gray-600">
+              Show
+            </label>
             <select
               id="entries"
               className="border border-gray-300 rounded p-1 text-sm"
@@ -43,48 +77,73 @@ const AssetTable: React.FC = () => {
 
           {/* Search */}
           <div className="flex items-center">
-            <label htmlFor="search" className="mr-2 text-sm text-gray-600">Search:</label>
+            <label htmlFor="search" className="mr-2 text-sm text-gray-600">
+              Search:
+            </label>
             <input
               id="search"
               type="text"
               className="border border-gray-300 rounded p-1 text-sm"
               placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
 
         {/* Table */}
         <div className="relative overflow-x-auto">
-          <table className="w-full table-auto border-collapse border border-gray-300 overflow-hidden" id='myTable'>
+          <table
+            className="w-full table-auto border-collapse border border-gray-300 overflow-hidden"
+            id="myTable"
+          >
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-2 border border-gray-300 text-left">Asset Name</th>
+                <th className="p-2 border border-gray-300 text-left">
+                  Asset Name
+                </th>
                 <th className="p-2 border border-gray-300 text-left">RFID</th>
                 <th className="p-2 border border-gray-300 text-left">TYPE</th>
-                <th className="p-2 border border-gray-300 text-left">Location</th>
-                <th className="p-2 border border-gray-300 text-left">Available</th>
-                <th className="p-2 border border-gray-300 text-left" id='col'>Action</th>
+                <th className="p-2 border border-gray-300 text-left">
+                  Location
+                </th>
+                <th className="p-2 border border-gray-300 text-left">
+                  Available
+                </th>
+                <th className="p-2 border border-gray-300 text-left" id="col">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
-              {assets.map((asset) => (
+              {filteredAssets.map((asset) => (
                 <tr key={asset.id} className="relative group item-center">
-                  <td className="p-2 border border-gray-300">{asset.fields.name || getTypeById(asset.type)?.name}</td>
+                  <td className="p-2 border border-gray-300">
+                    {asset.fields.name || getTypeById(asset.type)?.name}
+                  </td>
                   <td className="p-2 border border-gray-300">{asset.RFID}</td>
-                  <td className="p-2 border border-gray-300">{getTypeById(asset.type)?.name}</td>
-                  <td className="p-2 border border-gray-300">{getAssetByRFID(asset.parentId)?.fields.name || "-"}</td>  
-                  <td className="p-2 border border-gray-300">{asset.isAvailable ? "Yes" : "No"}</td>
+                  <td className="p-2 border border-gray-300">
+                    {getTypeById(asset.type)?.name}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {getAssetByRFID(asset.parentId)?.fields.name || "-"}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {asset.isAvailable ? "Yes" : "No"}
+                  </td>
 
                   {/* Edit Button */}
-                  <td className="p-2 border border-gray-200 justify-center flex" id='col'>
+                  <td
+                    className="p-2 border border-gray-200 justify-center flex"
+                    id="col"
+                  >
                     <button
-                      className="bg-red-500 text-white px-3 py-1 rounded"
+                      className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
                       onClick={() => navigate(`/edit-assets/${asset.RFID}`)}
-                      >
+                    >
                       Edit
                     </button>
-                      </td>
-                  
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -93,7 +152,10 @@ const AssetTable: React.FC = () => {
 
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-          <span>Showing 1 to 1 of 1 entries</span>
+          <span>
+            Showing {filteredAssets.length > 0 ? 1 : 0} to {filteredAssets.length} of{" "}
+            {assets.length} entries
+          </span>
           <div className="flex space-x-2">
             <button className="px-3 py-1 border rounded">Previous</button>
             <button className="px-3 py-1 border rounded">1</button>
@@ -101,8 +163,6 @@ const AssetTable: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
     </div>
   );
 };

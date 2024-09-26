@@ -1,8 +1,8 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const RFIDTag: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Page Title */}
@@ -10,13 +10,21 @@ const RFIDTag: React.FC = () => {
 
       {/* Action Button */}
       <div className="mb-4 flex gap-4">
-        <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/changeRFID')}>
+        <button
+            className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
+            onClick={() => navigate("/changeRFID")}
+        >
           Change
         </button>
-        <button className="bg-red-500 text-white  px-4 py-2 rounded" >
+        <button className="bg-[#F39C12] hover:bg-[#E67E22] text-white py-2 px-4 rounded">
           Excel
         </button>
-        <button className="bg-zinc-100 border border-zinc-300 shadow-md text-black  px-4 py-2 rounded" onClick={()=>{navigate('/disableRFID')}}>
+        <button
+          className="bg-zinc-100 border border-zinc-300 shadow-md text-black  px-4 py-2 rounded"
+          onClick={() => {
+            navigate("/disableRFID");
+          }}
+        >
           Enable / Disable
         </button>
       </div>
@@ -58,13 +66,21 @@ const RFIDTag: React.FC = () => {
         <table className="w-full table-auto border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 border border-gray-300 text-left">Asset Name</th>
+              <th className="p-2 border border-gray-300 text-left">
+                Asset Name
+              </th>
               <th className="p-2 border border-gray-300 text-left">MFG PN</th>
               <th className="p-2 border border-gray-300 text-left">ItemID</th>
               <th className="p-2 border border-gray-300 text-left">Capacity</th>
-              <th className="p-2 border border-gray-300 text-left">Previous Tag ID</th>
-              <th className="p-2 border border-gray-300 text-left">Current Tag ID</th>
-              <th className="p-2 border border-gray-300 text-left">User Name</th>
+              <th className="p-2 border border-gray-300 text-left">
+                Previous Tag ID
+              </th>
+              <th className="p-2 border border-gray-300 text-left">
+                Current Tag ID
+              </th>
+              <th className="p-2 border border-gray-300 text-left">
+                User Name
+              </th>
               <th className="p-2 border border-gray-300 text-left">Date</th>
               <th className="p-2 border border-gray-300 text-left">Notes</th>
             </tr>
@@ -95,8 +111,6 @@ const RFIDTag: React.FC = () => {
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 };

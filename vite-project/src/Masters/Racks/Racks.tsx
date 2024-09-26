@@ -6,52 +6,45 @@ import * as XLSX from "xlsx";
 const Racks: React.FC = () => {
   const navigate = useNavigate();
   const { getAssetsByType, getAssetByRFID } = useAssetStore();
-  const racks = getAssetsByType(22);
-  function downloadTableAsExcel() {
-    // Select the table element
-    const table = document.getElementById("myTable");
+  const racks = getAssetsByType(22); // Assuming 22 is the type ID for racks
 
-    // Create a new workbook and worksheet
+  const downloadTableAsExcel = () => {
+    const table = document.getElementById("myTable");
+    if (!table) {
+      console.error("Table not found!");
+      return;
+    }
+
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, "Racks");
+    XLSX.writeFile(wb, "racks.xlsx");
+  };
 
-    // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-    // Generate Excel file and prompt download
-    XLSX.writeFile(wb, "table.xlsx");
-  }
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Navbar */}
-
       {/* Page Title */}
-      <div className="text-2xl font-semibold ">Racks</div>
+      <div className="text-2xl font-semibold">Racks</div>
 
       {/* Action Buttons */}
       <div className="flex space-x-4 mt-4">
         <button
-          className="bg-red-500 text-white px-4 py-2 rounded"
+          className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
           onClick={() => navigate("/add-racks")}
         >
           Add
         </button>
-        {/* <button
-          className="bg-red-500 text-white px-4 py-2 rounded"
-          onClick={() => navigate("/edit-racks")}
-        >
-          Edit
-        </button> */}
         <button
-          className="bg-red-500 text-white px-4 py-2 rounded "
+          className="bg-[#F39C12] hover:bg-[#E67E22] text-white py-2 px-4 rounded"
           onClick={downloadTableAsExcel}
         >
-          Excel
+          Export to Excel
         </button>
       </div>
 
       {/* Table */}
       <div className="bg-white mt-6 shadow rounded p-4">
+        {/* Table Controls */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <label htmlFor="entries" className="text-gray-600">
@@ -73,6 +66,7 @@ const Racks: React.FC = () => {
               id="search"
               className="border border-gray-300 rounded p-1"
               placeholder="Search"
+              // Implement search functionality as needed
             />
           </div>
         </div>
@@ -84,43 +78,45 @@ const Racks: React.FC = () => {
               <th className="p-2 border border-gray-300">Row</th>
               <th className="p-2 border border-gray-300">Rack Name</th>
               <th className="p-2 border border-gray-300">Rack Description</th>
-              <th className="p-2 border border-gray-300">Aciton</th>
+              <th className="p-2 border border-gray-300">Action</th>
             </tr>
           </thead>
           <tbody>
-            {racks.map((rack, index) => (
-              <tr className="border-t">
-                <td
-                  className="p-2 border border-gray-300"
-                  rowSpan={rack.fields.length}
-                >
-                  {getAssetByRFID(rack.parentId)?.fields.name}
-                </td>
-                <td className="p-2 border border-gray-300">
-                  {rack.fields.name}
-                </td>
-                <td className="p-2 border border-gray-300">
-                  {rack.fields.description}
-                </td>
-                <td
-                  className="p-2 border border-gray-200 justify-center flex"
-                  id="col"
-                >
-                  <button
-                    className="bg-red-500 text-white px-3 py-1 rounded"
-                    onClick={() => navigate(`/edit-asset/${rack.id}`)}
-                  >
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {racks.map((rack) => {
+              const parent = rack.parentId
+                ? getAssetByRFID(rack.parentId)
+                : null;
+              return (
+                <tr key={rack.RFID} className="border-t">
+                  <td className="p-2 border border-gray-300">
+                    {parent ? parent.fields.name : "N/A"}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {rack.fields.name}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {rack.fields.description}
+                  </td>
+                  <td className="p-2 border border-gray-200 flex justify-center">
+                    <button
+                      className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
+                      onClick={() => navigate(`/edit-racks/${rack.RFID}`)}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-          <span>Showing 1 to 2 of 2 entries</span>
+          <span>
+            Showing {racks.length > 0 ? 1 : 0} to {racks.length} of{" "}
+            {racks.length} entries
+          </span>
           <div className="flex space-x-4">
             <button className="px-3 py-1 border rounded">Previous</button>
             <button className="px-3 py-1 border rounded">1</button>
@@ -128,8 +124,6 @@ const Racks: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
     </div>
   );
 };

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAssetStore } from '../../store/store';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAssetStore } from "../../store/store";
 
 const AddCupboard: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedRack, setSelectedRack] = useState('');
-  const [cupboardName, setCupboardName] = useState('');
-  const [cupboardDescription, setCupboardDescription] = useState('');
+  const [selectedRack, setSelectedRack] = useState("");
+  const [cupboardName, setCupboardName] = useState("");
+  const [cupboardDescription, setCupboardDescription] = useState("");
   const { getAssetsByType, addAsset } = useAssetStore();
   const [rackOptions, setRackOptions] = useState<any[]>([]); // Adjust the type as needed
 
@@ -16,7 +16,7 @@ const AddCupboard: React.FC = () => {
         const options = await getAssetsByType(22); // Replace with the actual parentId
         setRackOptions(options);
       } catch (error) {
-        console.error('Error fetching rack options:', error);
+        console.error("Error fetching rack options:", error);
       }
     };
 
@@ -28,19 +28,24 @@ const AddCupboard: React.FC = () => {
     const min = 1000000000; // 10 digits minimum
     const max = 9999999999; // 10 digits maximum
     return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+  }
 
   const handleSave = () => {
     const id = generateRandom10DigitNumber();
     // Add save logic here
-    addAsset(`${id}`, 23, { name: cupboardName, description: cupboardDescription }, selectedRack);
-    console.log('Saved', { selectedRack, cupboardName, cupboardDescription });
+    addAsset(
+      `${id}`,
+      23,
+      { name: cupboardName, description: cupboardDescription },
+      selectedRack
+    );
+    console.log("Saved", { selectedRack, cupboardName, cupboardDescription });
     // Optionally, navigate to another page after saving
-    navigate('/cupboards');
+    navigate("/cupboards");
   };
 
   const handleBack = () => {
-    navigate('/cupboards');
+    navigate("/cupboards");
   };
 
   return (
@@ -104,13 +109,13 @@ const AddCupboard: React.FC = () => {
         <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={handleBack}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
           >
             Back
           </button>
           <button
             onClick={handleSave}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#6C5CE7] hover:bg-[#5B4BCE] text-white py-2 px-4 rounded"
           >
             Save
           </button>
@@ -118,7 +123,6 @@ const AddCupboard: React.FC = () => {
       </div>
 
       {/* Footer */}
-
     </div>
   );
 };

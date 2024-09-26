@@ -16,6 +16,8 @@ import ChangeRFIDTag from "./Actions/RFIDTags/ChangeRFID";
 import DisableRFIDTag from "./Actions/RFIDTags/DisableRFID";
 import AddRow from "./Masters/Racks/AddRow";
 import AssetSearch from "./Masters/AssetSearch";
+import Location from "./Masters/Location/Location";
+import EditCupboardForm from "./Masters/Cupboards/EditCupboard";
 
 export const router = createBrowserRouter([
   {
@@ -49,7 +51,7 @@ export const router = createBrowserRouter([
         handle: { title: "row" },
       },
       {
-        path: "/edit-racks",
+        path: "/edit-racks/:id",
         element: <RowForm />,
         handle: { title: "rowform" },
       },
@@ -61,49 +63,53 @@ export const router = createBrowserRouter([
       {
         path: "/add-cupboards",
         element: <AddCupboard />,
-        handle: { title: "add-cupboards" },
+        handle: { title: "add-cupboards"},
       },
       {
-        path: "/edit-cupboards",
-        element: <EditCupboard />,
-        handle: { title: "edit-cupboards" },
+        path: "/edit-cupboards/:id",
+        element: <EditCupboardForm />,
+        handle: { title: "edit-cupboards"},
       },
       {
         path: "/add-assets",
         element: <AssetTable />,
-        handle: { title: "assets" },
+        handle: { title: "assets"},
       },
       {
         path: "/edit-assets/:id",
         element: <EditAssets />,
-        handle: { title: "edit-assets" },
+        handle: { title: "edit-assets"},
       },
       {
         path: "/assets",
         element: <AssetForm />,
-        handle: { title: "add-assets" },
+        handle: { title: "add-assets"},
       },
       {
         path: "/RFIDTags",
         element: <RFIDTag />,
-        handle: { title: "RFIDTags" },
+        handle: { title: "RFIDTags"},
       },
       {
         path: "/changeRFID",
         element: <ChangeRFIDTag />,
-        handle: { title: "changeRFID" },
+        handle: { title: "changeRFID"},
       },
       {
         path: "/disableRFID",
         element: <DisableRFIDTag />,
-        handle: { title: "disableRFID" },
+        handle: { title: "disableRFID"},
       },
       {
         path: "/asset-search",
         element: <AssetSearch />,
         handle: { title: "asset-search" },
+      },
+      {
+        path: "/location",
+        element: <Location />,
+        handle: { title: "asset-search" },
       }
-      // Removed the extra comma here
     ],
   },
 ]);

@@ -29,7 +29,7 @@ const RackForm: React.FC = () => {
     const min = 1000000000; // 10 digits minimum
     const max = 9999999999; // 10 digits maximum
     return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+  }
   const handleSave = () => {
     // Add save logic here
     const id = generateRandom10DigitNumber();
@@ -73,7 +73,10 @@ const RackForm: React.FC = () => {
                   </option>
                 ))}
               </select>
-             <HiPlusCircle className="text-4xl cursor-pointer "  onClick={() => navigate("/add-row")}/>
+              <HiPlusCircle
+                className="text-4xl cursor-pointer "
+                onClick={() => navigate("/add-row")}
+              />
             </div>
           </div>
 
@@ -110,13 +113,13 @@ const RackForm: React.FC = () => {
         <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={handleBack}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
           >
             Back
           </button>
           <button
             onClick={handleSave}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#6C5CE7] hover:bg-[#5B4BCE] text-white py-2 px-4 rounded"
           >
             Save
           </button>

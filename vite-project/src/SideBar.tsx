@@ -1,5 +1,6 @@
+// Sidebar.tsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaChevronDown,
   FaChevronUp,
@@ -7,24 +8,31 @@ import {
   FaCog,
   FaTag,
 } from "react-icons/fa";
+import { MdDashboard } from "react-icons/md";
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // To determine the active route
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMasterOpen, setIsMasterOpen] = useState(false);
-  const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null); // For hover in closed state
+  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+  const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
 
-  // Menu structure with submenus
+  // Define your menu items here
   const menuItems = [
+    {
+      label: "Dashboard",
+      icon: <MdDashboard />,
+      route: "/dashboard",
+    },
     {
       label: "Master",
       icon: <FaCog />,
       submenu: [
+        { label: "Location", route: "/location" },
         { label: "Rack", route: "/racks" },
         { label: "Cupboard", route: "/cupboards" },
         { label: "Assets", route: "/assets" },
-        { label: "Asset Search", route: "/asset-search" }, // Added Asset Search
+        { label: "Asset Search", route: "/asset-search" },
       ],
     },
     {
@@ -37,27 +45,58 @@ const Sidebar: React.FC = () => {
     },
   ];
 
-  // Toggle sidebar open/close
+  // Toggle the sidebar open/closed
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+    // Close all submenus when collapsing the sidebar
+    if (isSidebarOpen) {
+      setOpenSubmenus({});
+    }
   };
 
-  // Submenu toggle handlers
-  const toggleMaster = () => {
-    setIsMasterOpen(!isMasterOpen);
+  // Toggle the visibility of a submenu
+  const toggleSubmenu = (label: string) => {
+    setOpenSubmenus((prevState) => ({
+      ...prevState,
+      [label]: !prevState[label],
+    }));
   };
 
-  const toggleActions = () => {
-    setIsActionsOpen(!isActionsOpen);
+  // Handle click on a menu item
+  const handleItemClick = (item: typeof menuItems[0]) => {
+    if (item.submenu) {
+      // If the item has a submenu, toggle it
+      toggleSubmenu(item.label);
+    } else {
+      // If the item has no submenu, navigate directly
+      navigate(item.route);
+      setActiveItem(item.route);
+    }
   };
+
+  // Handle click on a submenu item
+  const handleSubmenuItemClick = (route: string) => {
+    navigate(route);
+    setActiveItem(route);
+  };
+
+  // Determine if a route is active
+  const isActive = (route: string) => {
+    return location.pathname === route;
+  };
+
+  // Get active item based on current location
+  const [activeItem, setActiveItem] = useState<string | null>(
+    location.pathname
+  );
 
   return (
     <div
-      className={`bg-gray-800 text-white ${
+      className={`bg-[#121621] text-[#ECF0F1] ${
         isSidebarOpen ? "w-64" : "w-16"
       } h-full relative transition-all duration-300`}
     >
-      {/* Hamburger Icon */}
+      {/* Sidebar Header */}
       <div
         className={`flex items-center mt-5 ${
           isSidebarOpen ? "justify-start" : "justify-center"
@@ -67,129 +106,122 @@ const Sidebar: React.FC = () => {
           <FaBars
             className={`text-xl ${
               isSidebarOpen ? "rotate-0" : "rotate-180"
-            } transition-transform duration-300`}
+            } transition-transform duration-300 text-[#BDC3C7]`}
           />
         </button>
 
-        <h2
-          className={`text-lg font-semibold mb-4 px-2 ${
-            isSidebarOpen ? "block" : "hidden"
-          }`}
-        >
-          Menu
-        </h2>
+        {/* Show title only when sidebar is open */}
+        {isSidebarOpen && (
+          <h2 className="text-lg font-semibold mb-4 px-2">Menu</h2>
+        )}
       </div>
-      {/* Menu List */}
+
+      {/* Menu Items */}
       <ul>
-        {/* Master Menu */}
-        <li
-          className="py-2 cursor-pointer group relative"
-          onClick={() => isSidebarOpen && toggleMaster()} // Toggle only if sidebar is open
-          onMouseEnter={() => !isSidebarOpen && setHoveredMenu("Master")}
-          onMouseLeave={() => !isSidebarOpen && setHoveredMenu(null)}
-        >
-          <div
-            className={`flex items-center hover:bg-gray-700 px-2 py-2 rounded-md ${
-              isSidebarOpen ? "justify-between" : "justify-center"
-            }`}
-          >
-            {!isSidebarOpen && <span>{menuItems[0].icon}</span>}
-            {isSidebarOpen && (
-              <>
-                <span className="ml-4">{menuItems[0].label}</span>
-                {isMasterOpen ? <FaChevronUp /> : <FaChevronDown />}
-              </>
-            )}
-          </div>
+        {menuItems.map((menuItem) => {
+          const hasSubmenu = !!menuItem.submenu;
+          const isSubmenuOpen = openSubmenus[menuItem.label];
+          const isMenuActive = hasSubmenu
+            ? menuItem.submenu.some((sub) => isActive(sub.route))
+            : isActive(menuItem.route);
 
-          {/* Submenu for Master */}
-          {isMasterOpen && isSidebarOpen && (
-            <ul className="ml-4 mt-2 space-y-2">
-              {menuItems[0].submenu.map((item, index) => (
-                <li
-                  key={index}
-                  className="cursor-pointer hover:bg-gray-700 px-2 py-1 rounded-md"
-                  onClick={() => navigate(item.route)}
-                >
-                  {item.label}
-                </li>
-              ))}
-            </ul>
-          )}
+          return (
+            <li
+              key={menuItem.route || menuItem.label}
+              className="py-2 cursor-pointer group relative"
+              onClick={() => handleItemClick(menuItem)}
+              onMouseEnter={() =>
+                !isSidebarOpen && hasSubmenu
+                  ? setHoveredMenu(menuItem.label)
+                  : null
+              }
+              onMouseLeave={() =>
+                !isSidebarOpen && hasSubmenu
+                  ? setHoveredMenu(null)
+                  : null
+              }
+            >
+              {/* Menu Item */}
+              <div
+                className={`flex items-center px-2 py-2 ${
+                  isSidebarOpen ? "justify-between" : "justify-center"
+                } ${
+                  isMenuActive
+                    ? "bg-[#635bff]"
+                    : "hover:bg-[#1ABC9C] transition-colors duration-200"
+                } rounded-md`}
+              >
+                {/* Icon */}
+                <div className="flex items-center">
+                  <span className="text-xl">{menuItem.icon}</span>
+                  {isSidebarOpen && (
+                    <span className="ml-4">{menuItem.label}</span>
+                  )}
+                </div>
 
-          {/* Show submenu in absolute position on hover when sidebar is closed */}
-          {!isSidebarOpen && hoveredMenu === "Master" && (
-            <div className="absolute left-16 top-0 w-48 bg-gray-800 shadow-lg rounded-md z-50">
-              <h3 className="text-white px-4 py-2">Master</h3>
-              <ul className="ml-4 mt-2 space-y-2">
-                {menuItems[0].submenu.map((item, index) => (
-                  <li
-                    key={index}
-                    className="cursor-pointer hover:bg-gray-700 px-2 py-1 rounded-md"
-                    onClick={() => navigate(item.route)}
-                  >
-                    {item.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
+                {/* Chevron for submenu items */}
+                {isSidebarOpen && hasSubmenu && (
+                  <span className="ml-2">
+                    {isSubmenuOpen ? <FaChevronUp /> : <FaChevronDown />}
+                  </span>
+                )}
+              </div>
 
-        {/* Actions Menu */}
-        <li
-          className="py-2 cursor-pointer group relative"
-          onClick={() => isSidebarOpen && toggleActions()}
-          onMouseEnter={() => !isSidebarOpen && setHoveredMenu("Actions")}
-          onMouseLeave={() => !isSidebarOpen && setHoveredMenu(null)}
-        >
-          <div
-            className={`flex items-center hover:bg-gray-700 px-2 py-2 rounded-md ${
-              isSidebarOpen ? "justify-between" : "justify-center"
-            }`}
-          >
-            {!isSidebarOpen && <span>{menuItems[0].icon}</span>}
-            {isSidebarOpen && (
-              <>
-                <span className="ml-4">{menuItems[1].label}</span>
-                {isActionsOpen ? <FaChevronUp /> : <FaChevronDown />}
-              </>
-            )}
-          </div>
+              {/* Submenu */}
+              {hasSubmenu && isSidebarOpen && isSubmenuOpen && (
+                <div className="bg-[#262626] text-[#ECF0F1] w-full mt-1 rounded-md">
+                  <ul className="w-full">
+                    {menuItem.submenu.map((subItem) => (
+                      <li
+                        key={subItem.route}
+                        className={`bg-[#262626] w-full hover:bg-[#1ABC9C] text-white p-4 rounded-md ${
+                          isActive(subItem.route) ? "bg-[#1ABC9C]" : ""
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent triggering parent onClick
+                          handleSubmenuItemClick(subItem.route);
+                        }}
+                      >
+                        {subItem.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-          {/* Submenu for Actions */}
-          {isActionsOpen && isSidebarOpen && (
-            <ul className="ml-4 mt-2 space-y-2">
-              {menuItems[1].submenu.map((item, index) => (
-                <li
-                  key={index}
-                  className="cursor-pointer hover:bg-gray-700 px-2 py-1 rounded-md"
-                  onClick={() => navigate(item.route)}
-                >
-                  {item.label}
-                </li>
-              ))}
-            </ul>
-          )}
+              {/* Hover Tooltip for Collapsed Sidebar */}
+              {!isSidebarOpen && hasSubmenu && hoveredMenu === menuItem.label && (
+                <div className="absolute left-16 top-0 w-48 bg-[#2C3E50] shadow-lg rounded-md z-50">
+                  <h3 className="text-white px-4 py-2">{menuItem.label}</h3>
+                  <ul className="ml-4 mt-2 space-y-2">
+                    {menuItem.submenu.map((subItem) => (
+                      <li
+                        key={subItem.route}
+                        className={`cursor-pointer hover:bg-[#1ABC9C] px-2 py-1 rounded-md ${
+                          isActive(subItem.route) ? "bg-[#1ABC9C]" : ""
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSubmenuItemClick(subItem.route);
+                          setHoveredMenu(null); // Close tooltip after click
+                        }}
+                      >
+                        {subItem.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-          {/* Show submenu in absolute position on hover when sidebar is closed */}
-          {!isSidebarOpen && hoveredMenu === "Actions" && (
-            <div className="absolute left-16 top-0 w-48 bg-gray-800 shadow-lg rounded-md z-50">
-              <h3 className="text-white px-4 py-2">Actions</h3>
-              <ul className="ml-4 mt-2 space-y-2">
-                {menuItems[1].submenu.map((item, index) => (
-                  <li
-                    key={index}
-                    className="cursor-pointer hover:bg-gray-700 px-2 py-1 rounded-md"
-                    onClick={() => navigate(item.route)}
-                  >
-                    {item.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
+              {/* Tooltip for items without submenus when collapsed (optional) */}
+              {!isSidebarOpen && !hasSubmenu && (
+                <div className="absolute left-16 top-0 w-48 bg-[#2C3E50] shadow-lg rounded-md z-50">
+                  <h3 className="text-white px-4 py-2">{menuItem.label}</h3>
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
