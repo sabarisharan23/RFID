@@ -16,6 +16,7 @@ import ChangeRFIDTag from "./Actions/RFIDTags/ChangeRFID";
 import DisableRFIDTag from "./Actions/RFIDTags/DisableRFID";
 import AddRow from "./Masters/Racks/AddRow";
 import AssetSearch from "./Masters/AssetSearch";
+import AssetIdentification from "./Masters/AssetIdentification";
 import Location from "./Masters/Location/Location";
 import EditCupboardForm from "./Masters/Cupboards/EditCupboard";
 
@@ -104,6 +105,11 @@ export const router = createBrowserRouter([
         path: "/asset-search",
         element: <AssetSearch />,
         handle: { title: "asset-search" },
+      },
+      {
+        path: "/asset-identification",
+        element: <AssetIdentification />,
+        handle: { title: "asset-identification" },
       },
       {
         path: "/location",

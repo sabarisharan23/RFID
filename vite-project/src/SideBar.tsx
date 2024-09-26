@@ -33,6 +33,7 @@ const Sidebar: React.FC = () => {
         { label: "Cupboard", route: "/cupboards" },
         { label: "Assets", route: "/assets" },
         { label: "Asset Search", route: "/asset-search" },
+        { label: 'Asset Identification', route: '/asset-identification' }, // Added Asset Identification
       ],
     },
     {
