@@ -7,46 +7,10 @@ const AssetTable: React.FC = () => {
   const navigate = useNavigate();
   const { assets, getTypeById, getAssetByRFID } = useAssetStore();
 
-  function downloadTableAsExcel() {
-    const columnsToExclude = document.querySelectorAll('#col'); // Columns to exclude
-    const table = document.getElementById('myTable'); // The table
-  
-    // Create a new workbook and worksheet
-    const wb = XLSX.utils.book_new();
-  
-    // Prepare a temporary array to store filtered table data
-    const data = [];
-  
-    // Loop through table rows
-    for (const row of table.rows) {
-      const rowData = [];
-      
-      // Loop through row cells and exclude those that match the column you want to exclude
-      for (let i = 0; i < row.cells.length; i++) {
-        const cell = row.cells[i];
-  
-        // Check if the current cell is part of the columns to exclude
-        const isExcluded = Array.from(columnsToExclude).some(excludedCol => excludedCol.cellIndex === i);
-  
-        if (!isExcluded) {
-          rowData.push(cell.innerText);
-        }
-      }
-  
-      // Add the filtered row to the data array
-      data.push(rowData);
-    }
-  
-    // Convert the filtered data into a worksheet
-    const ws = XLSX.utils.aoa_to_sheet(data);
-  
-    // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-  
-    // Generate and download the Excel file
-    XLSX.writeFile(wb, 'filtered_table.xlsx');
+
+  function downloadTableAsExcel(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
+    throw new Error('Function not implemented.');
   }
-  
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -55,7 +19,7 @@ const AssetTable: React.FC = () => {
         <h1 className="text-2xl font-semibold pb-4">Assets</h1>
         <div className="space-x-4 pb-6">
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-assets')}>Add</button>
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-assets')}>Edit</button>
+          {/* <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-assets')}>Edit</button> */}
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={downloadTableAsExcel}>Excel</button>
         </div>
       </div>
@@ -115,7 +79,7 @@ const AssetTable: React.FC = () => {
                   <td className="p-2 border border-gray-200 justify-center flex" id='col'>
                     <button
                       className="bg-red-500 text-white px-3 py-1 rounded"
-                      onClick={() => navigate(`/edit-asset/${asset.id}`)}
+                      onClick={() => navigate(`/edit-assets/${asset.RFID}`)}
                       >
                       Edit
                     </button>

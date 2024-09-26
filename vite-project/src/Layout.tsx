@@ -10,7 +10,7 @@ const Layout: React.FC = () => {
   const isLoginPage = location.pathname === '/';
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
     
       {!isLoginPage && <Sidebar />}
       <div className='flex flex-col w-full'>

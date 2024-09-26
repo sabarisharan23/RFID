@@ -18,6 +18,7 @@ interface Count {
 
 // Type for an individual asset
 interface Asset<T = any> {
+  id: any;
   RFID: string;
   type: number; // Refers to asset type ID
   fields: T;

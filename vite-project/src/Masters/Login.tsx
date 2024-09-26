@@ -11,8 +11,7 @@ const Login: React.FC = () => {
     if (username === 'user1@gmail.com' && password === 'password') {
       console.log('Login successful');
       navigate('/dashboard'); // Navigate to the dashboard
-
-    } else {  
+    } else {
       console.log('Invalid credentials');
       window.alert('Invalid credentials');
       // You may want to handle error display here
@@ -20,10 +19,10 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-md w-80">
-        <div className="mb-4">
-          <img src="path_to_your_logo.png" alt="Mindteck Logo" className="mx-auto" />
+    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-red-500 to-purple-500">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
+        <div className="mb-6">
+          <img src="path_to_your_logo.png" alt="Mindteck Logo" className="mx-auto w-24 h-24" />
         </div>
         <div className="mb-4">
           <input
@@ -31,7 +30,7 @@ const Login: React.FC = () => {
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
         <div className="mb-6">
@@ -40,11 +39,11 @@ const Login: React.FC = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
-          className="w-full px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-transform transform hover:scale-105"
           onClick={handleLogin}
         >
           Login

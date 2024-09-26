@@ -1,23 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAssetStore } from '../../store/store'; // Adjust the import path as needed
 
+// Define types for AssetField and Asset
+interface AssetFields {
+  [key: string]: string;
+}
+
+interface Asset {
+  RFID: string;
+  type: number;
+  fields: AssetFields;
+  parentId?: string;
+}
+
+interface AssetType {
+  id: number;
+  name: string;
+  fields: AssetFields;
+}
+
 const AssetForm: React.FC = () => {
-  const { assetType, addAsset, getAssetsByParentId } = useAssetStore();
+  const { id } = useParams<{ id: string }>(); // Get RFID or asset ID from URL (for editing mode)
+  const { assetType, addAsset, updateAsset, getAssetByRFID, getAssetsByParentId } = useAssetStore();
   const navigate = useNavigate();
 
   // Form state
-  const [rfid, setRfid] = useState('');
-  const [selectedAssetTypeId, setSelectedAssetTypeId] = useState(assetType[0].id);
-  const [fields, setFields] = useState(assetType[0].fields);
+  const [rfid, setRfid] = useState(id || ''); // Set RFID from URL if in edit mode
+  const [selectedAssetTypeId, setSelectedAssetTypeId] = useState<number>(assetType[0]?.id || 0);
+  const [fields, setFields] = useState<AssetFields>(assetType[0]?.fields || {});
 
   // States for dropdown options
-  const [rows, setRows] = useState([]);
+  const [rows, setRows] = useState<Asset[]>([]);
   const [selectedRowId, setSelectedRowId] = useState('');
-  const [racks, setRacks] = useState([]);
+  const [racks, setRacks] = useState<Asset[]>([]);
   const [selectedRackId, setSelectedRackId] = useState('');
   const [selectedCupboardId, setSelectedCupboardId] = useState('');
-  const [cupboards, setCupboards] = useState([]);
+  const [cupboards, setCupboards] = useState<Asset[]>([]);
+
+  // Load asset data if editing (id is present)
+  useEffect(() => {
+    if (id) {
+      const fetchedAsset = getAssetByRFID(id);
+      if (fetchedAsset) {
+        setRfid(fetchedAsset.RFID);
+        setSelectedAssetTypeId(fetchedAsset.type);
+        setFields(fetchedAsset.fields);
+        if (fetchedAsset.parentId) setSelectedCupboardId(fetchedAsset.parentId);
+      }
+    }
+  }, [id, getAssetByRFID]);
 
   // Fetch rows by parent ID
   useEffect(() => {
@@ -47,7 +79,7 @@ const AssetForm: React.FC = () => {
       if (selectedRackId) {
         const fetchedCupboards = await getAssetsByParentId(selectedRackId); // Fetch cupboards using selected rack ID
         setCupboards(fetchedCupboards);
-        setSelectedCupboardId(fetchedCupboards[0].RFID);
+        setSelectedCupboardId(fetchedCupboards[0]?.RFID || '');
       }
     };
     fetchCupboards();
@@ -70,8 +102,15 @@ const AssetForm: React.FC = () => {
   };
 
   const handleSave = () => {
-    addAsset(rfid, selectedAssetTypeId, fields, selectedCupboardId);
-    console.log('Asset added:', { rfid, selectedAssetTypeId, fields, selectedCupboardId });
+    if (id) {
+      // If an id is present, update the existing asset
+      updateAsset(rfid, fields);
+      console.log('Asset updated:', { rfid, selectedAssetTypeId, fields, selectedCupboardId });
+    } else {
+      // Otherwise, add a new asset
+      addAsset(rfid, selectedAssetTypeId, fields, selectedCupboardId);
+      console.log('Asset added:', { rfid, selectedAssetTypeId, fields, selectedCupboardId });
+    }
     navigate('/assets'); // Navigate back after saving
   };
 
@@ -85,7 +124,9 @@ const AssetForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-2xl font-semibold pb-2">Add Assets</h1>
+      <h1 className="text-2xl font-semibold pb-2">
+        {id ? 'Edit Asset' : 'Add Asset'} {/* Change title based on whether it's edit or add */}
+      </h1>
       <div className="bg-white mt-6 shadow rounded p-6">
 
         {/* Render Dynamic Fields Based on Selected Asset Type */}
@@ -144,10 +185,7 @@ const AssetForm: React.FC = () => {
             </label>
             <select
               value={selectedRowId}
-              onChange={(e) => {
-                setSelectedRowId(e.target.value);
-                
-              }}
+              onChange={(e) => setSelectedRowId(e.target.value)}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
             >
               <option value="" disabled>Select Row</option>
@@ -166,10 +204,7 @@ const AssetForm: React.FC = () => {
             </label>
             <select
               value={selectedRackId}
-              onChange={(e) => {
-                setSelectedRackId(e.target.value);
-              
-              }}
+              onChange={(e) => setSelectedRackId(e.target.value)}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
               disabled={!selectedRowId} // Enable only if a row is selected
             >
@@ -239,7 +274,7 @@ const AssetForm: React.FC = () => {
             onClick={handleSave}
             className="bg-red-500 text-white px-4 py-2 rounded"
           >
-            Save
+            {id ? 'Update' : 'Save'} {/* Change button text based on whether it's edit or add */}
           </button>
         </div>
       </div>

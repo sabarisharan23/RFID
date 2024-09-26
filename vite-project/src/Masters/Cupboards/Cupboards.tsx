@@ -27,12 +27,12 @@ const CupboardsTable: React.FC = () => {
       {/* Navbar */}
 
       {/* Page Title */}
-      <div className="text-3xl font-semibold mt-6">Cupboards</div>
+      <div className="text-3xl font-semibold ">Cupboards</div>
 
       {/* Action Buttons */}
       <div className="flex space-x-4 mt-4">
         <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-cupboards')}>Add</button>
-        <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-cupboards')}>Edit</button>
+        {/* <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-cupboards')}>Edit</button> */}
         <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={downloadTableAsExcel}>Excel</button>
       </div>
 
@@ -93,6 +93,7 @@ const CupboardsTable: React.FC = () => {
       </div>
 
       {/* Footer */}
+     
      
     </div>
   );

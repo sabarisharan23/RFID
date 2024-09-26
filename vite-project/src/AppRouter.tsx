@@ -74,7 +74,7 @@ export const router = createBrowserRouter([
         handle: { title: "assets" },
       },
       {
-        path: "/edit-assets",
+        path: "/edit-assets/:id",
         element: <EditAssets />,
         handle: { title: "edit-assets" },
       },
@@ -102,8 +102,8 @@ export const router = createBrowserRouter([
         path: "/asset-search",
         element: <AssetSearch />,
         handle: { title: "asset-search" },
-      },
-     ,
+      }
+      // Removed the extra comma here
     ],
   },
 ]);

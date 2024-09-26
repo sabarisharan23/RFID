@@ -1,270 +1,317 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAssetStore } from '../../store/store';
+
+// Define types for AssetField and Asset
+interface AssetFields {
+  [key: string]: string;
+}
+
+interface Asset {
+  RFID: string;
+  type: number;
+  fields: AssetFields;
+  parentId?: string;
+}
+
+interface AssetType {
+  id: number;
+  name: string;
+  fields: AssetFields;
+}
 
 const EditAssets: React.FC = () => {
-  const [assetType, setAssetType] = useState('Asset');
-  const [assetName, setAssetName] = useState('');
-  const [capacity, setCapacity] = useState('');
-  const [pn3x5, setPn3x5] = useState('');
-  const [mfgPn, setMfgPn] = useState('');
-  const [vendor, setVendor] = useState('');
-  const [row, setRow] = useState('');
-  const [rack, setRack] = useState('');
-  const [project, setProject] = useState('');
-  const [cupboard, setCupboard] = useState('NA');
-  const [tagId, setTagId] = useState('');
-  const [notes, setNotes] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-
+  const { id } = useParams<{ id: string }>(); // Get RFID or asset ID from URL (for editing mode)
+  const { assetType, updateAsset, getAssetByRFID, getAssetsByParentId } = useAssetStore();
   const navigate = useNavigate();
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
-    }
+  // Form state
+  const [rfid, setRfid] = useState(id || ''); // Set RFID from URL if in edit mode
+  const [selectedAssetTypeId, setSelectedAssetTypeId] = useState<number>(assetType[0]?.id || 0);
+  const [fields, setFields] = useState<AssetFields>({});
+
+  // States for dropdown options
+  const [rows, setRows] = useState<Asset[]>([]);
+  const [selectedRowId, setSelectedRowId] = useState('');
+  const [racks, setRacks] = useState<Asset[]>([]);
+  const [selectedRackId, setSelectedRackId] = useState('');
+  const [cupboards, setCupboards] = useState<Asset[]>([]);
+  const [selectedCupboardId, setSelectedCupboardId] = useState('');
+
+  // Load asset data if editing (id is present)
+  useEffect(() => {
+    const loadAssetData = async () => {
+      if (id) {
+        const fetchedAsset = getAssetByRFID(id);
+        if (fetchedAsset) {
+          setRfid(fetchedAsset.RFID);
+          setSelectedAssetTypeId(fetchedAsset.type);
+          setFields(fetchedAsset.fields);
+
+          let cupboardId = fetchedAsset.parentId;
+          let rackId = '';
+          let rowId = '';
+          const labId = '1234567890'; // Lab's RFID
+
+          // Set selectedCupboardId
+          if (cupboardId) {
+            setSelectedCupboardId(cupboardId);
+            const cupboard = getAssetByRFID(cupboardId);
+
+            // Set selectedRackId
+            if (cupboard && cupboard.parentId) {
+              rackId = cupboard.parentId;
+              setSelectedRackId(rackId);
+              const rack = getAssetByRFID(rackId);
+
+              // Set selectedRowId
+              if (rack && rack.parentId) {
+                rowId = rack.parentId;
+                setSelectedRowId(rowId);
+              }
+            }
+          }
+
+          // Fetch rows using labId
+          const fetchedRows = await getAssetsByParentId(labId);
+          setRows(fetchedRows);
+
+          // Fetch racks if rowId is available
+          if (rowId) {
+            const fetchedRacks = await getAssetsByParentId(rowId);
+            setRacks(fetchedRacks);
+          }
+
+          // Fetch cupboards if rackId is available
+          if (rackId) {
+            const fetchedCupboards = await getAssetsByParentId(rackId);
+            setCupboards(fetchedCupboards);
+          }
+        }
+      }
+    };
+    loadAssetData();
+  }, [id, getAssetByRFID, getAssetsByParentId]);
+
+  // Fetch rows on component mount (for creating a new asset)
+  useEffect(() => {
+    const fetchRows = async () => {
+      const labId = '1234567890'; // Lab's RFID
+      const fetchedRows = await getAssetsByParentId(labId);
+      setRows(fetchedRows);
+    };
+    fetchRows();
+  }, [getAssetsByParentId]);
+
+  // Fetch racks when a row is selected
+  useEffect(() => {
+    const fetchRacks = async () => {
+      if (selectedRowId) {
+        const fetchedRacks = await getAssetsByParentId(selectedRowId);
+        setRacks(fetchedRacks);
+      } else {
+        setRacks([]);
+      }
+    };
+    fetchRacks();
+  }, [selectedRowId, getAssetsByParentId]);
+
+  // Fetch cupboards when a rack is selected
+  useEffect(() => {
+    const fetchCupboards = async () => {
+      if (selectedRackId) {
+        const fetchedCupboards = await getAssetsByParentId(selectedRackId);
+        setCupboards(fetchedCupboards);
+      } else {
+        setCupboards([]);
+      }
+    };
+    fetchCupboards();
+  }, [selectedRackId, getAssetsByParentId]);
+
+  // Utility function to format names
+  const formatName = (name: string) => {
+    return name
+      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .trim() // Remove any leading/trailing whitespace
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
+  // Handle field changes
+  const handleFieldChange = (field: string, value: string) => {
+    setFields((prevFields) => ({
+      ...prevFields,
+      [field]: value,
+    }));
   };
 
   const handleSave = () => {
-    // Add save logic here
-    console.log('Saved', {
-      assetType,
-      assetName,
-      capacity,
-      pn3x5,
-      mfgPn,
-      vendor,
-      row,
-      rack,
-      project,
-      cupboard,
-      tagId,
-      notes,
-      image,
-      file,
-    });
+    if (id) {
+      // If an id is present, update the existing asset
+      updateAsset(rfid, fields, selectedCupboardId);
+      console.log('Asset updated:', { rfid, selectedAssetTypeId, fields, selectedCupboardId });
+    }
+    navigate('/assets'); // Navigate back after saving
   };
 
   const handleBack = () => {
-navigate('/assets');
+    navigate('/assets');
   };
 
-
-  const handleDelete = () => {
-    // Add back logic here
-    console.log('Back');
+  const handleScan = () => {
+    console.log('Scan button clicked'); // Placeholder for actual scanning logic
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Form */}
-      <h1 className="text-2xl font-semibold pb-2">Edit Assets</h1>
+      <h1 className="text-2xl font-semibold pb-2">
+        {id ? 'Edit Asset' : 'Add Asset'} {/* Change title based on whether it's edit or add */}
+      </h1>
       <div className="bg-white mt-6 shadow rounded p-6">
+        {/* Render Dynamic Fields Based on Selected Asset Type */}
+        <div className="col-span-3 border border-gray-300 rounded p-4 mt-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Asset Details</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Asset Type Dropdown moved here */}
+            <div className="col-span-3">
+              <label className="block text-sm font-medium text-gray-700">
+                Asset Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedAssetTypeId}
+                onChange={(e) => {
+                  const typeId = parseInt(e.target.value);
+                  setSelectedAssetTypeId(typeId);
+                  const assetTypeSelected = assetType.find((at) => at.id === typeId);
+                  if (assetTypeSelected) {
+                    setFields(assetTypeSelected.fields); // Update fields when asset type changes
+                  }
+                }}
+                className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
+                disabled // Disable changing asset type during edit
+              >
+                <option value="" disabled>
+                  Select Asset Type
+                </option>
+                {assetType.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {formatName(type.name)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="grid grid-cols-3 gap-6">
-          {/* Asset Type */}
+            {Object.keys(fields).map((fieldKey) => (
+              <div key={fieldKey} className="max-w-[450px]">
+                <label className="block text-sm font-medium text-gray-700">
+                  {formatName(fieldKey)} {/* Format the label */}
+                </label>
+                <input
+                  type="text"
+                  value={fields[fieldKey]}
+                  onChange={(e) => handleFieldChange(fieldKey, e.target.value)}
+                  className="block w-full border border-gray-300 rounded p-2 mt-1"
+                  placeholder={`Enter ${formatName(fieldKey)}`} // Format placeholder as well
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Location Details Section */}
+        <div className="grid grid-cols-3 gap-6 mt-6">
+          {/* Row Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Asset Type <span className="text-red-500">*</span>
+              Row <span className="text-red-500">*</span>
             </label>
             <select
-              value={assetType}
-              onChange={(e) => setAssetType(e.target.value)}
+              value={selectedRowId}
+              onChange={(e) => {
+                setSelectedRowId(e.target.value);
+                setSelectedRackId('');
+                setSelectedCupboardId('');
+              }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
             >
-              <option value="Asset">Asset</option>
-              <option value="Equipment">Equipment</option>
+              <option value="" disabled>
+                Select Row
+              </option>
+              {rows.map((row) => (
+                <option key={row.RFID} value={row.RFID}>
+                  {formatName(row.fields.name)} {/* Assuming row has a name property */}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* 3x5 PN */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              3x5 PN
-            </label>
-            <input
-              type="text"
-              value={pn3x5}
-              onChange={(e) => setPn3x5(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter 3x5 PN"
-            />
-          </div>
-
-          {/* MFG PN */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              MFG PN <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={mfgPn}
-              onChange={(e) => setMfgPn(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter MFG PN"
-            />
-          </div>
-
-          {/* Asset Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Asset Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={assetName}
-              onChange={(e) => setAssetName(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Asset Name"
-            />
-          </div>
-
-          {/* Vendor */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Vendor
-            </label>
-            <input
-              type="text"
-              value={vendor}
-              onChange={(e) => setVendor(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Vendor"
-            />
-          </div>
-
-          {/* Capacity */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Capacity <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Capacity"
-            />
-          </div>
-
-          {/* Row Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Row</label>
-            <select
-              value={row}
-              onChange={(e) => setRow(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            >
-              <option value="">Select</option>
-              <option value="Row 1">Row 1</option>
-              <option value="Row 2">Row 2</option>
-            </select>
-          </div>
-
-          {/* Rack Selection */}
+          {/* Rack Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Rack</label>
             <select
-              value={rack}
-              onChange={(e) => setRack(e.target.value)}
+              value={selectedRackId}
+              onChange={(e) => {
+                setSelectedRackId(e.target.value);
+                setSelectedCupboardId('');
+              }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
+              disabled={!selectedRowId} // Enable only if a row is selected
             >
-              <option value="">Select</option>
-              <option value="Rack 1">Rack 1</option>
-              <option value="Rack 2">Rack 2</option>
+              <option value="" disabled>
+                Select Rack
+              </option>
+              {racks.map((rack) => (
+                <option key={rack.RFID} value={rack.RFID}>
+                  {formatName(rack.fields.name)} {/* Assuming rack has a name property */}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Project Selection */}
+          {/* Cupboard Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Project
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Cupboard</label>
             <select
-              value={project}
-              onChange={(e) => setProject(e.target.value)}
+              value={selectedCupboardId}
+              onChange={(e) => {
+                console.log('Cupboard selected:', e.target.value);
+                setSelectedCupboardId(e.target.value);
+              }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
+              disabled={!selectedRackId} // Enable only if a rack is selected
             >
-              <option value="">Select</option>
-              <option value="Project A">Project A</option>
-              <option value="Project B">Project B</option>
+              <option value="" disabled>
+                Select Cupboard
+              </option>
+              {cupboards.map((cupboard) => (
+                <option key={cupboard.RFID} value={cupboard.RFID}>
+                  {formatName(cupboard.fields.name)} {/* Assuming cupboard has a name property */}
+                </option>
+              ))}
             </select>
           </div>
+        </div>
 
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Notes
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Notes"
-            />
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Image
-            </label>
-            <input
-              type="file"
-              onChange={handleImageUpload}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            />
-            <button className="bg-red-500 text-white px-4 py-2 mt-2 rounded">
-              Upload
-            </button>
-          </div>
-
-          {/* Cupboard Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cupboard
-            </label>
-            <select
-              value={cupboard}
-              onChange={(e) => setCupboard(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            >
-              <option value="NA">NA</option>
-              <option value="Cupboard 1">Cupboard 1</option>
-              <option value="Cupboard 2">Cupboard 2</option>
-            </select>
-          </div>
-
-          {/* Tag ID */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Tag ID <span className="text-red-500">*</span>
-            </label>
+        {/* RFID Input moved to the last position */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700">
+            RFID <span className="text-red-500">*</span>
+          </label>
+          <div className="flex items-center space-x-2">
             <input
               type="text"
-              value={tagId}
-              onChange={(e) => setTagId(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter Tag ID"
+              value={rfid}
+              onChange={(e) => setRfid(e.target.value)}
+              className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
+              placeholder="Enter RFID"
+              disabled // Disable changing RFID during edit
             />
-          </div>
-
-          {/* File Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">File</label>
-            <input
-              type="file"
-              onChange={handleFileUpload}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-            />
-            <button className="bg-red-500 text-white px-4 py-2 mt-2 rounded">
-              Upload
+            <button
+              onClick={handleScan}
+              className="bg-red-500 text-white px-4 py-2 rounded"
+              disabled // Disable scan button during edit
+            >
+              Scan
             </button>
           </div>
         </div>
@@ -281,19 +328,12 @@ navigate('/assets');
             onClick={handleSave}
             className="bg-red-500 text-white px-4 py-2 rounded"
           >
-            Update
-          </button>
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Delete
+            Update {/* Since this is EditAssets, button text is 'Update' */}
           </button>
         </div>
       </div>
 
       {/* Footer */}
-      
     </div>
   );
 };
