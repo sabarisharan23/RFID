@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+
 const RowForm: React.FC = () => {
   const navigate = useNavigate();
   const [rowName, setRowName] = useState('');
@@ -17,6 +18,7 @@ const RowForm: React.FC = () => {
   const handleDelete = () => {
     console.log('Saved', { rowName, rowDescription });
    };
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

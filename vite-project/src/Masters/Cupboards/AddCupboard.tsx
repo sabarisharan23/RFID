@@ -31,8 +31,9 @@ const AddCupboard: React.FC = () => {
 }
 
   const handleSave = () => {
+    const id = generateRandom10DigitNumber();
     // Add save logic here
-    addAsset(`${generateRandom10DigitNumber}`, 23, { name: cupboardName, description: cupboardDescription }, selectedRack);
+    addAsset(`${id}`, 23, { name: cupboardName, description: cupboardDescription }, selectedRack);
     console.log('Saved', { selectedRack, cupboardName, cupboardDescription });
     // Optionally, navigate to another page after saving
     navigate('/cupboards');

@@ -32,8 +32,9 @@ const RackForm: React.FC = () => {
 }
   const handleSave = () => {
     // Add save logic here
+    const id = generateRandom10DigitNumber();
     addAsset(
-      `${generateRandom10DigitNumber}`,
+      `${id}`,
       22,
       { name: rackName, description: rackDescription },
       selectedRow

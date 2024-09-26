@@ -1,10 +1,26 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAssetStore } from '../../store/store';
+import * as XLSX from 'xlsx';
 
 const AssetTable: React.FC = () => {
   const navigate = useNavigate();
   const {assets,getTypeById, getAssetByRFID} = useAssetStore();
+
+  function downloadTableAsExcel() {
+    // Select the table element
+    const table = document.getElementById('myTable');
+    
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table);
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    // Generate Excel file and prompt download
+    XLSX.writeFile(wb, 'table.xlsx');
+}
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Action Buttons */}
@@ -13,8 +29,7 @@ const AssetTable: React.FC = () => {
         <div className="space-x-4 pb-6">
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-assets')}>Add</button>
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-assets')}>Edit</button>
-          <button className="bg-red-500 text-white px-4 py-2 rounded">Excel</button>
-       
+          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={downloadTableAsExcel}>Excel</button>
         </div>
       </div>
 
@@ -48,7 +63,7 @@ const AssetTable: React.FC = () => {
         </div>
 
         {/* Table */}
-        <table className="w-full table-auto border-collapse border border-gray-300">
+        <table className="w-full table-auto border-collapse border border-gray-300" id='myTable'>
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border border-gray-300 text-left">Asset Name</th>

@@ -20,7 +20,8 @@ const AddRow: React.FC = () => {
   };
 
   const handleSave = () => {
-    addAsset(`${generateRandom10DigitNumber}`, 21,{rowName, rowDescription},"1234567890");
+    const id = generateRandom10DigitNumber();
+    addAsset(`${id}`, 21,{name: rowName, description: rowDescription},"1234567890");
     handleBack();
   };
 

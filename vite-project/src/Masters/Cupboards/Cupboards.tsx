@@ -1,12 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAssetStore } from '../../store/store';
+import * as XLSX from 'xlsx';
 
 const CupboardsTable: React.FC = () => {
   const navigate = useNavigate();
   const { getAssetsByType, getAssetByRFID } = useAssetStore();
   const cupboards = getAssetsByType(23); // Fetch cupboards instead of racks
 
+  function downloadTableAsExcel() {
+    // Select the table element
+    const table = document.getElementById('myTable');
+    
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table);
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    // Generate Excel file and prompt download
+    XLSX.writeFile(wb, 'table.xlsx');
+}
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Navbar */}
@@ -18,7 +33,7 @@ const CupboardsTable: React.FC = () => {
       <div className="flex space-x-4 mt-4">
         <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/add-cupboards')}>Add</button>
         <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => navigate('/edit-cupboards')}>Edit</button>
-        <button className="bg-red-500 text-white px-4 py-2 rounded">Excel</button>
+        <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={downloadTableAsExcel}>Excel</button>
       </div>
 
       {/* Table */}
@@ -45,7 +60,7 @@ const CupboardsTable: React.FC = () => {
         </div>
 
         {/* Table Data */}
-        <table className="w-full mt-4 border border-gray-300">
+        <table className="w-full mt-4 border border-gray-300" id='myTable'>
           <thead className="bg-gray-100 text-left">
             <tr>
               <th className="p-2 border border-gray-300">Rack</th>
