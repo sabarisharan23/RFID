@@ -30,12 +30,7 @@ const AssetIdentification: React.FC = () => {
   // Function to get the parent hierarchy of an asset
   const getParentHierarchy = (asset) => {
     let currentAsset = asset;
-    const hierarchy = {
-      location: null,
-      row: null,
-      rack: null,
-      cupboard: null,
-    };
+    const hierarchy = {};
 
     while (currentAsset.parentId) {
       const parentAsset = getAssetByRFID(currentAsset.parentId);
@@ -144,6 +139,10 @@ const AssetIdentification: React.FC = () => {
 
   // Utility function to format names
   const formatName = (name: string) => {
+    if (/^[A-Z]+$/.test(name)) {
+      return name; // Return the name as is if it contains only capital letters
+    }
+  
     return name
       .replace(/([A-Z])/g, ' $1') // Add space before capital letters
       .trim()
@@ -158,78 +157,63 @@ const AssetIdentification: React.FC = () => {
     }));
   };
 
-  // Export selected assets to Excel
-  const exportToExcel = () => {
-    const selectedAssetsArray = [];
+  // Export assets to Excel
+  const exportToExcel = (exportAll: boolean) => {
+    let assetsToExport = [];
 
     if (hierarchyData) {
       if (hierarchyData.asset) {
         // Single asset
-        if (selectedAssets[hierarchyData.asset.RFID]) {
-          selectedAssetsArray.push(hierarchyData.asset);
+        if (exportAll || selectedAssets[hierarchyData.asset.RFID]) {
+          assetsToExport.push(hierarchyData.asset);
         }
       } else if (hierarchyData.assets && hierarchyData.assets.length > 0) {
         // Multiple assets
-        selectedAssetsArray.push(
-          ...hierarchyData.assets.filter((asset) => selectedAssets[asset.RFID])
-        );
+        if (exportAll) {
+          assetsToExport = hierarchyData.assets;
+        } else {
+          assetsToExport = hierarchyData.assets.filter((asset) => selectedAssets[asset.RFID]);
+        }
       }
     }
 
-    if (selectedAssetsArray.length === 0) {
-      alert('No assets selected for export.');
+    if (assetsToExport.length === 0) {
+      alert('No assets available for export.');
       return;
     }
 
     // Prepare data for Excel
     const workbook = XLSX.utils.book_new();
 
-    // Group assets by type
-    const assetsByType = selectedAssetsArray.reduce((acc, asset) => {
-      const typeName = getTypeById(asset.type)?.name || 'Unknown';
-      if (!acc[typeName]) acc[typeName] = [];
-      acc[typeName].push(asset);
-      return acc;
-    }, {});
-
-    // For each asset type, create a sheet
-    Object.entries(assetsByType).forEach(([typeName, assetsOfType]: [string, any[]]) => {
-      // Prepare headers with hierarchy columns
-      const headers = [
-        'RFID',
-        'Location',
-        'Row',
-        'Rack',
-        'Cupboard',
-        ...Object.keys(assetsOfType[0].fields),
-      ];
-
-      // Prepare data rows
-      const data = assetsOfType.map((asset) => {
-        // Get hierarchy for the asset
-        const hierarchy = getParentHierarchy(asset);
-        return [
-          asset.RFID,
-          hierarchy.location?.fields.name || '',
-          hierarchy.row?.fields.name || '',
-          hierarchy.rack?.fields.name || '',
-          hierarchy.cupboard?.fields.name || '',
-          ...Object.values(asset.fields),
-        ];
-      });
-
-      // Add headers at the beginning
-      data.unshift(headers);
-
-      const worksheet = XLSX.utils.aoa_to_sheet(data);
-      XLSX.utils.book_append_sheet(workbook, worksheet, formatName(typeName));
+    // For each asset, retrieve parent hierarchy and prepare data
+    const data = assetsToExport.map((asset) => {
+      const parentHierarchy = getParentHierarchy(asset);
+      const assetData = {
+        Location: parentHierarchy.location?.fields.name || '',
+        Row: parentHierarchy.row?.fields.name || '',
+        Rack: parentHierarchy.rack?.fields.name || '',
+        Cupboard: parentHierarchy.cupboard?.fields.name || '',
+        AssetType: formatName(getTypeById(asset.type)?.name || ''),
+        RFID: asset.RFID,
+        ...asset.fields,
+      };
+      return assetData;
     });
 
+    // Prepare headers
+    const headers = Object.keys(data[0]);
+
+    // Convert data to worksheet
+    const worksheetData = [headers, ...data.map((row) => headers.map((header) => row[header]))];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Assets');
+
     // Export to Excel
-    XLSX.writeFile(workbook, 'selected_assets_with_hierarchy.xlsx');
+    XLSX.writeFile(workbook, 'assets_export.xlsx');
   };
 
-  // Check if any assets are available for export
+  // Check if any assets are selected for export
   const isExportDisabled = !Object.values(selectedAssets).some((isSelected) => isSelected);
 
   return (
@@ -253,23 +237,29 @@ const AssetIdentification: React.FC = () => {
               onClick={handleSearch}
               className="bg-red-500 text-white px-4 py-2 rounded"
             >
-              Search
+              Identify
             </button>
           </div>
           {searchError && <p className="text-red-500 mt-2">{searchError}</p>}
         </div>
 
-        {/* Export Button */}
+        {/* Export Buttons */}
         {hierarchyData && (
-          <div className="mt-4">
+          <div className="mt-4 flex space-x-2">
             <button
-              onClick={exportToExcel}
+              onClick={() => exportToExcel(false)} // Export selected assets
               className={`bg-red-500 text-white px-4 py-2 rounded ${
                 isExportDisabled ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               disabled={isExportDisabled}
             >
               Export Selected to Excel
+            </button>
+            <button
+              onClick={() => exportToExcel(true)} // Export all assets
+              className="bg-red-500 text-white px-4 py-2 rounded"
+            >
+              Export All to Excel
             </button>
           </div>
         )}
@@ -314,21 +304,16 @@ const AssetIdentification: React.FC = () => {
                               }
                             />
                           </th>
-                          {[
-                            'RFID',
-                            'Location',
-                            'Row',
-                            'Rack',
-                            'Cupboard',
-                            ...Object.keys(hierarchyData.asset.fields),
-                          ].map((field) => (
-                            <th
-                              key={field}
-                              className="p-2 border border-gray-300 text-left"
-                            >
-                              {formatName(field)}
-                            </th>
-                          ))}
+                          {['RFID', ...Object.keys(hierarchyData.asset.fields)].map(
+                            (field) => (
+                              <th
+                                key={field}
+                                className="p-2 border border-gray-300 text-left"
+                              >
+                                {formatName(field)}
+                              </th>
+                            )
+                          )}
                         </tr>
                       </thead>
                       <tbody>
@@ -336,19 +321,6 @@ const AssetIdentification: React.FC = () => {
                           <td className="p-2 border border-gray-300"></td>
                           <td className="p-2 border border-gray-300">
                             {hierarchyData.asset.RFID}
-                          </td>
-                          {/* Hierarchy Columns */}
-                          <td className="p-2 border border-gray-300">
-                            {hierarchyData.location?.fields.name || ''}
-                          </td>
-                          <td className="p-2 border border-gray-300">
-                            {hierarchyData.row?.fields.name || ''}
-                          </td>
-                          <td className="p-2 border border-gray-300">
-                            {hierarchyData.rack?.fields.name || ''}
-                          </td>
-                          <td className="p-2 border border-gray-300">
-                            {hierarchyData.cupboard?.fields.name || ''}
                           </td>
                           {Object.keys(hierarchyData.asset.fields).map((fieldKey) => (
                             <td key={fieldKey} className="p-2 border border-gray-300">
@@ -397,59 +369,38 @@ const AssetIdentification: React.FC = () => {
                                     )}
                                   />
                                 </th>
-                                {[
-                                  'RFID',
-                                  'Location',
-                                  'Row',
-                                  'Rack',
-                                  'Cupboard',
-                                  ...Object.keys(assetsOfType[0].fields),
-                                ].map((field) => (
-                                  <th
-                                    key={field}
-                                    className="p-2 border border-gray-300 text-left"
-                                  >
-                                    {formatName(field)}
-                                  </th>
-                                ))}
+                                {['RFID', ...Object.keys(assetsOfType[0].fields)].map(
+                                  (field) => (
+                                    <th
+                                      key={field}
+                                      className="p-2 border border-gray-300 text-left"
+                                    >
+                                      {formatName(field)}
+                                    </th>
+                                  )
+                                )}
                               </tr>
                             </thead>
                             <tbody>
-                              {assetsOfType.map((asset) => {
-                                const assetHierarchy = getParentHierarchy(asset);
-                                return (
-                                  <tr key={asset.RFID}>
-                                    <td className="p-2 border border-gray-300">
-                                      <input
-                                        type="checkbox"
-                                        checked={!!selectedAssets[asset.RFID]}
-                                        onChange={(e) =>
-                                          handleAssetSelect(asset.RFID, e.target.checked)
-                                        }
-                                      />
+                              {assetsOfType.map((asset) => (
+                                <tr key={asset.RFID}>
+                                  <td className="p-2 border border-gray-300">
+                                    <input
+                                      type="checkbox"
+                                      checked={!!selectedAssets[asset.RFID]}
+                                      onChange={(e) =>
+                                        handleAssetSelect(asset.RFID, e.target.checked)
+                                      }
+                                    />
+                                  </td>
+                                  <td className="p-2 border border-gray-300">{asset.RFID}</td>
+                                  {Object.keys(asset.fields).map((fieldKey) => (
+                                    <td key={fieldKey} className="p-2 border border-gray-300">
+                                      {asset.fields[fieldKey]}
                                     </td>
-                                    <td className="p-2 border border-gray-300">{asset.RFID}</td>
-                                    {/* Hierarchy Columns */}
-                                    <td className="p-2 border border-gray-300">
-                                      {assetHierarchy.location?.fields.name || ''}
-                                    </td>
-                                    <td className="p-2 border border-gray-300">
-                                      {assetHierarchy.row?.fields.name || ''}
-                                    </td>
-                                    <td className="p-2 border border-gray-300">
-                                      {assetHierarchy.rack?.fields.name || ''}
-                                    </td>
-                                    <td className="p-2 border border-gray-300">
-                                      {assetHierarchy.cupboard?.fields.name || ''}
-                                    </td>
-                                    {Object.keys(asset.fields).map((fieldKey) => (
-                                      <td key={fieldKey} className="p-2 border border-gray-300">
-                                        {asset.fields[fieldKey]}
-                                      </td>
-                                    ))}
-                                  </tr>
-                                );
-                              })}
+                                  ))}
+                                </tr>
+                              ))}
                             </tbody>
                           </table>
                         </div>
