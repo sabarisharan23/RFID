@@ -218,7 +218,7 @@ const AssetIdentification: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-2xl font-semibold pb-2">Asset Identification</h1>
+      <h1 className="text-2xl font-semibold pb-2">Asset Reports</h1>
       <div className="bg-white mt-6 shadow rounded p-6">
         {/* ID Input */}
         <div className="mt-6">
@@ -248,7 +248,7 @@ const AssetIdentification: React.FC = () => {
           <div className="mt-4 flex space-x-2">
             <button
               onClick={() => exportToExcel(false)} // Export selected assets
-              className={`bg-red-500 text-white px-4 py-2 rounded ${
+              className={`bg-yellow-500 text-white px-4 py-2 rounded ${
                 isExportDisabled ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               disabled={isExportDisabled}
@@ -257,7 +257,7 @@ const AssetIdentification: React.FC = () => {
             </button>
             <button
               onClick={() => exportToExcel(true)} // Export all assets
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              className="bg-yellow-500 text-white px-4 py-2 rounded"
             >
               Export All to Excel
             </button>

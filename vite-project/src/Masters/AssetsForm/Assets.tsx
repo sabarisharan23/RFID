@@ -8,11 +8,6 @@ const AssetTable: React.FC = () => {
   const { assets, getTypeById, getAssetByRFID } = useAssetStore();
   const [searchQuery, setSearchQuery] = useState("");
 
-  function downloadTableAsExcel(
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    throw new Error("Function not implemented.");
-  }
 
   // List of types to exclude
   const typesToExclude = ["location", "row", "rack", "cupboard"];
@@ -35,6 +30,21 @@ const AssetTable: React.FC = () => {
       return searchString.includes(searchQuery.toLowerCase());
     });
 
+
+    function downloadTableAsExcel() {
+      // Select the table element
+      const table = document.getElementById('myTable');
+      
+      // Create a new workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.table_to_sheet(table);
+  
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  
+      // Generate Excel file and prompt download
+      XLSX.writeFile(wb, 'Assets.xlsx');
+  }
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Action Buttons */}

@@ -9,6 +9,8 @@ import {
   FaTag,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+import { TbReport } from "react-icons/tb";
+
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -32,20 +34,22 @@ const Sidebar: React.FC = () => {
         { label: "Rack", route: "/racks" },
         { label: "Cupboard", route: "/cupboards" },
         { label: "Assets", route: "/assets" },
-        { label: "Asset Search", route: "/asset-search" },
-        { label: "Asset Identification", route: "/asset-identification" },
+       
       ],
     },
+    
     {
-      label: "Actions",
-      icon: <FaTag />,
+      label: "Reports",
+      icon: <TbReport />,
       submenu: [
-        { label: "Asset", route: "/assets" },
-        { label: "Configure RFID", route: "/RFIDTags" },
+        
+        { label: "Asset Search", route: "/asset-search" },
+        { label: "Asset Reports", route: "/asset-identification" },
       ],
     },
+    
   ];
-
+  
   // Toggle the sidebar open/closed
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
