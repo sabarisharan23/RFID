@@ -19,22 +19,22 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-red-500 to-purple-500">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
+    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-gray-100 to-gray-200">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-[20%]">
         <div className="mb-6">
           <img
-            src="path_to_your_logo.png"
+            src="/images.png"
             alt="Mindteck Logo"
-            className="mx-auto w-24 h-24"
+            className="mx-auto w-[80%] h-24"
           />
         </div>
-        <div className="mb-4">
+        <div className="mb-6">
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#635bff]"
           />
         </div>
         <div className="mb-6">
@@ -47,7 +47,7 @@ const Login: React.FC = () => {
           />
         </div>
         <button
-          className="w-full px-4 py-3 bg-[#635bff] text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-transform transform hover:scale-105"
+          className="w-full px-4 py-3 bg-[#635bff] text-white rounded-lg hover:bg-[#635bff] focus:outline-none focus:ring-2 focus:ring-purple-500 transition-transform transform hover:scale-105"
           onClick={handleLogin}
         >
           Login

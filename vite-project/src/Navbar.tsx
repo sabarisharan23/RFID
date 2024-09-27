@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
       <div className="text-2xl font-bold text-[#2C3E50]">Mindteck RFID</div>
 
       {/* Log Out Button */}
-      <button className="flex justify-center items-center gap-2 text-[#FFFFFF] bg-[#E74C3C] border font-semibold border-[#C0392B] rounded px-2 py-1 shadow-md" onClick={() => navigate('/')}>
+      <button className="flex justify-center items-center gap-2 text-black bg-white border border-gray-300 font-semibold  rounded px-2 py-1 shadow-md" onClick={() => navigate('/')}>
        <GrLogout className='text-xl'/> Log Out
       </button>
     </div>

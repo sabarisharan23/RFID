@@ -33,7 +33,7 @@ const Sidebar: React.FC = () => {
         { label: "Cupboard", route: "/cupboards" },
         { label: "Assets", route: "/assets" },
         { label: "Asset Search", route: "/asset-search" },
-        { label: 'Asset Identification', route: '/asset-identification' }, // Added Asset Identification
+        { label: "Asset Identification", route: "/asset-identification" },
       ],
     },
     {
@@ -71,14 +71,12 @@ const Sidebar: React.FC = () => {
     } else {
       // If the item has no submenu, navigate directly
       navigate(item.route);
-      setActiveItem(item.route);
     }
   };
 
   // Handle click on a submenu item
   const handleSubmenuItemClick = (route: string) => {
     navigate(route);
-    setActiveItem(route);
   };
 
   // Determine if a route is active
@@ -86,10 +84,13 @@ const Sidebar: React.FC = () => {
     return location.pathname === route;
   };
 
-  // Get active item based on current location
-  const [activeItem, setActiveItem] = useState<string | null>(
-    location.pathname
-  );
+  // Determine if a menu item is active (for headings)
+  const isMenuActive = (item: typeof menuItems[0]) => {
+    if (item.submenu) {
+      return item.submenu.some((sub) => isActive(sub.route));
+    }
+    return isActive(item.route || "");
+  };
 
   return (
     <div
@@ -122,9 +123,7 @@ const Sidebar: React.FC = () => {
         {menuItems.map((menuItem) => {
           const hasSubmenu = !!menuItem.submenu;
           const isSubmenuOpen = openSubmenus[menuItem.label];
-          const isMenuActive = hasSubmenu
-            ? menuItem.submenu.some((sub) => isActive(sub.route))
-            : isActive(menuItem.route);
+          const menuActive = isMenuActive(menuItem);
 
           return (
             <li
@@ -147,12 +146,12 @@ const Sidebar: React.FC = () => {
                 className={`flex items-center px-2 py-2 ${
                   isSidebarOpen ? "justify-between" : "justify-center"
                 } ${
-                  isMenuActive
+                  menuActive
                     ? "bg-[#635bff]"
                     : "hover:bg-[#1ABC9C] transition-colors duration-200"
                 } rounded-md`}
               >
-                {/* Icon */}
+                {/* Icon and Label */}
                 <div className="flex items-center">
                   <span className="text-xl">{menuItem.icon}</span>
                   {isSidebarOpen && (
@@ -175,8 +174,10 @@ const Sidebar: React.FC = () => {
                     {menuItem.submenu.map((subItem) => (
                       <li
                         key={subItem.route}
-                        className={`bg-[#262626] w-full hover:bg-[#1ABC9C] text-white p-4 rounded-md ${
-                          isActive(subItem.route) ? "bg-[#1ABC9C]" : ""
+                        className={`w-full text-white px-4 py-2 rounded-md ${
+                          isActive(subItem.route)
+                            ? "bg-[#1ABC9C]"
+                            : "hover:bg-[#1ABC9C] transition-colors duration-200"
                         }`}
                         onClick={(e) => {
                           e.stopPropagation(); // Prevent triggering parent onClick
@@ -191,33 +192,32 @@ const Sidebar: React.FC = () => {
               )}
 
               {/* Hover Tooltip for Collapsed Sidebar */}
-              {!isSidebarOpen && hasSubmenu && hoveredMenu === menuItem.label && (
-                <div className="absolute left-16 top-0 w-48 bg-[#2C3E50] shadow-lg rounded-md z-50">
+              {!isSidebarOpen && (
+                <div
+                  className={`absolute left-16 top-0 w-48 bg-[#2C3E50] shadow-lg rounded-md z-50 ${
+                    hoveredMenu === menuItem.label ? "block" : "hidden"
+                  }`}
+                >
                   <h3 className="text-white px-4 py-2">{menuItem.label}</h3>
-                  <ul className="ml-4 mt-2 space-y-2">
-                    {menuItem.submenu.map((subItem) => (
-                      <li
-                        key={subItem.route}
-                        className={`cursor-pointer hover:bg-[#1ABC9C] px-2 py-1 rounded-md ${
-                          isActive(subItem.route) ? "bg-[#1ABC9C]" : ""
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSubmenuItemClick(subItem.route);
-                          setHoveredMenu(null); // Close tooltip after click
-                        }}
-                      >
-                        {subItem.label}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Tooltip for items without submenus when collapsed (optional) */}
-              {!isSidebarOpen && !hasSubmenu && (
-                <div className="absolute left-16 top-0 w-48 bg-[#2C3E50] shadow-lg rounded-md z-50">
-                  <h3 className="text-white px-4 py-2">{menuItem.label}</h3>
+                  {hasSubmenu && (
+                    <ul className="ml-4 mt-2 space-y-2">
+                      {menuItem.submenu.map((subItem) => (
+                        <li
+                          key={subItem.route}
+                          className={`cursor-pointer hover:bg-[#1ABC9C] px-2 py-1 rounded-md ${
+                            isActive(subItem.route) ? "bg-[#1ABC9C]" : ""
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubmenuItemClick(subItem.route);
+                            setHoveredMenu(null); // Close tooltip after click
+                          }}
+                        >
+                          {subItem.label}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
             </li>

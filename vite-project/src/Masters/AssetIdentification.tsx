@@ -235,7 +235,7 @@ const AssetIdentification: React.FC = () => {
             />
             <button
               onClick={handleSearch}
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              className="bg-[#6C5CE7] hover:bg-[#5B4BCE] text-white py-2 px-4 rounded"
             >
               Identify
             </button>
@@ -416,7 +416,7 @@ const AssetIdentification: React.FC = () => {
         <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={handleBack}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
           >
             Back
           </button>

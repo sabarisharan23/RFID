@@ -19,6 +19,8 @@ import AssetSearch from "./Masters/AssetSearch";
 import AssetIdentification from "./Masters/AssetIdentification";
 import Location from "./Masters/Location/Location";
 import EditCupboardForm from "./Masters/Cupboards/EditCupboard";
+import AddLocation from "./Masters/Location/AddLocation";
+import EditLocation from "./Masters/Location/EditLocation";
 
 export const router = createBrowserRouter([
   {
@@ -49,7 +51,7 @@ export const router = createBrowserRouter([
       {
         path: "/add-row",
         element: <AddRow />,
-        handle: { title: "row" },
+        handle: { title: "addrow" },
       },
       {
         path: "/edit-racks/:id",
@@ -115,7 +117,18 @@ export const router = createBrowserRouter([
         path: "/location",
         element: <Location />,
         handle: { title: "asset-search" },
-      }
+      },
+      {
+        path: "/add-location",
+        element: <AddLocation />,
+        handle: { title: "add-location" },
+      },
+      {
+        path: "/edit-location/:id",
+        element: <EditLocation />,
+        handle: { title: "edit-location" },
+      },
+     
     ],
   },
 ]);

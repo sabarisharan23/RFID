@@ -24,7 +24,6 @@ ChartJS.register(
 );
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate(); // For navigation
   const {
     assets,
     counts,
@@ -42,15 +41,18 @@ const Dashboard: React.FC = () => {
   const [rackCount, setRackCount] = useState(0);
   const [cupboardCount, setCupboardCount] = useState(0);
   const [assetCount, setAssetCount] = useState(0);
-  const [lab1AssetCount, setLab1AssetCount] = useState(0);
-  const [lab1AssetMovement, setLab1AssetMovement] = useState(0);
-  const [auditToday, setAuditToday] = useState(0);
+  const [locationCount, setLocationCount] = useState(0);
+  const locations = useAssetStore((state) => state.getLocations()); // Retrieve locations from Zustand store
+
   
   // Fetch counts on component mount and when dependencies change
   useEffect(() => {
     // Fetch Rows count (typeId: 21)
     const row = counts.find(c => c.id === 21);
     setRowCount(row ? row.totalQuantity : 0);
+// Fetch Locations count (typeId: 20)
+const location = counts.find(c => c.id === 20);
+setLocationCount(location ? location.totalQuantity : 0);
 
     // Fetch Racks count (typeId: 22)
     const rack = counts.find(c => c.id === 22);
@@ -78,7 +80,6 @@ const Dashboard: React.FC = () => {
           totalAssetsUnderLab += cupboards.length;
         });
       });
-      setLab1AssetCount(totalAssetsUnderLab);
     } else {
       setLab1AssetCount(0);
     }
@@ -98,12 +99,10 @@ const Dashboard: React.FC = () => {
         }
       });
     });
-    setLab1AssetMovement(movementsThisMonth);
 
     // Fetch audit logs for today
     const today = new Date();
     const auditsToday = getAuditLogsByDate(today).length;
-    setAuditToday(auditsToday);
   }, [counts, assets, assetMovements, auditLogs, getAssetByRFID, getAssetsByType, getAssetMovementsByRFID, getAuditLogsByDate, getAssetsByParentId]);
 
   // Data for Asset Movement Tracking Chart
@@ -224,85 +223,22 @@ const Dashboard: React.FC = () => {
         {/* LAB-1 Card */}
         <div className="bg-white p-4 shadow rounded">
           <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold">LAB-1</div>
+            <div className="text-xl font-semibold">Locations</div>
             <div className="bg-green-200 text-green-800 py-1 px-3 rounded-full text-sm">
               This Month
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-3xl font-bold">{lab1AssetMovement}</div>
-            <div className="text-gray-500">Asset Movement</div>
-            <div className="mt-4 text-3xl font-bold">{lab1AssetCount}</div>
-            <div className="text-gray-500">Asset Count</div>
+            <div className="text-3xl font-bold">{locations.length}</div>
+            {/* <div className="text-gray-500">Location Count/</div> */}
+            <div className="text-gray-500 mt-3">Asset Count</div>
+            <div className="mt-4 text-3xl font-bold">{assetCount}</div>
           </div>
         </div>
 
         {/* Audit Card */}
-        <div className="bg-white p-4 shadow rounded">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold">Audit</div>
-            <div className="bg-red-200 text-red-800 py-1 px-3 rounded-full text-sm">
-              Today
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold">{auditToday}</div>
-            <div className="text-gray-500">Audit</div>
-            <button
-              className="mt-4 bg-gray-100 text-gray-700 px-4 py-2 rounded"
-              onClick={() => navigate("/audit")}
-            >
-              More Info
-            </button>
-          </div>
-        </div>
+        
       </div>
-
-      {/* Asset Movement Tracking */}
-      <div className="mt-8 bg-white p-4 shadow rounded">
-        <div className="flex justify-between items-center">
-          <div className="text-xl font-semibold">Asset Movement Tracking</div>
-          <div className="text-gray-500">Monthly</div>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-4 flex">
-          <div className="flex items-center mr-6">
-            <div className="w-4 h-4 bg-gray-800 mr-2"></div>
-            <div>Total Asset Movement</div>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-[#635bff] mr-2"></div>
-            <div>Equipment Movement</div>
-          </div>
-        </div>
-
-        {/* Chart */}
-        <div className="mt-4">
-          {movementChartData.labels && movementChartData.labels.length > 0 ? (
-            <Bar
-              data={movementChartData}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                  title: {
-                    display: false,
-                    text: 'Asset Movement Tracking',
-                  },
-                },
-              }}
-            />
-          ) : (
-            <div>No movement data available.</div>
-          )}
-        </div>
-      </div>
-
-      {/* Footer */}
-      {/* If you have a footer component, include it here */}
     </div>
   );
 };

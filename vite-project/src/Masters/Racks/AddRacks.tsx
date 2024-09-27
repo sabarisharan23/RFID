@@ -8,13 +8,14 @@ const RackForm: React.FC = () => {
   const [selectedRow, setSelectedRow] = useState("");
   const [rackName, setRackName] = useState("");
   const [rackDescription, setRackDescription] = useState("");
-  const { getAssetsByParentId, getAssetByRFID, addAsset } = useAssetStore();
+  const { getAssetsByParentId, addAsset } = useAssetStore(); // Adjusted import
   const [rowOptions, setRowOptions] = useState<any[]>([]); // Adjust the type as needed
 
   useEffect(() => {
     const fetchRowOptions = async () => {
       try {
-        const options = await getAssetsByParentId("1234567890"); // Replace with the actual parentId
+        const options = await getAssetsByParentId("1234567890"); // Replace with the actual parentId (location)
+        console.log("Fetched row options:", options); // Add logging to verify what is fetched
         setRowOptions(options);
       } catch (error) {
         console.error("Error fetching row options:", error);
@@ -30,17 +31,17 @@ const RackForm: React.FC = () => {
     const max = 9999999999; // 10 digits maximum
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
+
   const handleSave = () => {
     // Add save logic here
     const id = generateRandom10DigitNumber();
     addAsset(
       `${id}`,
-      22,
+      22, // Assuming 22 is the ID for a rack
       { name: rackName, description: rackDescription },
-      selectedRow
+      selectedRow // Link the selected row as parent
     );
     console.log("Saved", { selectedRow, rackName, rackDescription });
-    // Optionally, navigate to another page after saving
     navigate("/racks");
   };
 
@@ -67,11 +68,15 @@ const RackForm: React.FC = () => {
                 className="block w-full border border-gray-300 rounded p-2"
               >
                 <option value="">Select a Row</option>
-                {rowOptions.map((option) => (
-                  <option key={option.RFID} value={option.RFID}>
-                    {option.fields.name} - {option.fields.description}
-                  </option>
-                ))}
+                {rowOptions.length === 0 ? (
+                  <option value="">No rows available</option>
+                ) : (
+                  rowOptions.map((option) => (
+                    <option key={option.RFID} value={option.RFID}>
+                      {option.fields.name} - {option.fields.description}
+                    </option>
+                  ))
+                )}
               </select>
               <HiPlusCircle
                 className="text-4xl cursor-pointer "
@@ -125,8 +130,6 @@ const RackForm: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Footer */}
     </div>
   );
 };
