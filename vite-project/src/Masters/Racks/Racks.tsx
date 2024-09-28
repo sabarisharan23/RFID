@@ -7,20 +7,38 @@ const Racks: React.FC = () => {
   const navigate = useNavigate();
   const { getAssetsByType, getAssetByRFID } = useAssetStore();
   const racks = getAssetsByType(22); // Assuming 22 is the type ID for racks
+  function downloadTableAsExcel() {
+    // Select the table element
+    const table = document.getElementById('myTable');
+    
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Get the table rows
+    const rows = table.rows ;
+    
+    // Prepare an array to store the modified table data
+    const data = [];
 
-  const downloadTableAsExcel = () => {
-    const table = document.getElementById("myTable");
-    if (!table) {
-      console.error("Table not found!");
-      return;
+    // Loop through each row
+    for (let i = 0; i < rows.length; i++) {
+        const row = [];
+        // Loop through each cell, omitting the last one
+        for (let j = 0; j < rows[i].cells.length - 1; j++) {
+            row.push(rows[i].cells[j].innerText);
+        }
+        data.push(row); // Add the row to the data array
     }
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.table_to_sheet(table);
-    XLSX.utils.book_append_sheet(wb, ws, "Racks");
-    XLSX.writeFile(wb, "racks.xlsx");
-  };
+    // Create worksheet from the modified data (without the last column)
+    const ws = XLSX.utils.aoa_to_sheet(data);
 
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    // Generate Excel file and prompt download
+    XLSX.writeFile(wb, 'Racks.xlsx');
+}
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Page Title */}

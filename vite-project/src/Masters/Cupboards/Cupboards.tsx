@@ -15,11 +15,34 @@ const CupboardsTable: React.FC = () => {
       return;
     }
 
+    // Get all rows of the table
+    const rows = table.querySelectorAll("tr");
+
+    // Prepare an array to hold the table data excluding the last column
+    const data = [];
+
+    // Loop through each row of the table
+    rows.forEach(row => {
+        const rowData = [];
+        const cells = row.querySelectorAll("td, th"); // Select both table headers and data cells
+        
+        // Exclude the last cell in the row
+        for (let i = 0; i < cells.length - 1; i++) {
+            rowData.push(cells[i].innerText); // Push the cell content to rowData
+        }
+        data.push(rowData); // Add the modified row to the data array
+    });
+
+    // Create a new workbook and worksheet from the modified data
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.table_to_sheet(table);
+    const ws = XLSX.utils.aoa_to_sheet(data); // Convert the data array to sheet
+
+    // Append the worksheet to the workbook
     XLSX.utils.book_append_sheet(wb, ws, "Cupboards");
+
+    // Generate Excel file and prompt download
     XLSX.writeFile(wb, "cupboards.xlsx");
-  };
+};
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

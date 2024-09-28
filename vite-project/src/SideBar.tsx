@@ -53,7 +53,7 @@ const Sidebar: React.FC = () => {
   // Toggle the sidebar open/closed
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-    // Close all submenus when collapsing the sidebar
+    // Close   submenus when collapsing the sidebar
     if (isSidebarOpen) {
       setOpenSubmenus({});
     }
@@ -100,7 +100,7 @@ const Sidebar: React.FC = () => {
     <div
       className={`bg-[#121621] text-[#ECF0F1] ${
         isSidebarOpen ? "w-64" : "w-16"
-      } h-full relative transition-all duration-300`}
+      } h-full relative transition-all duration-300 overflow-auto`}
     >
       {/* Sidebar Header */}
       <div
