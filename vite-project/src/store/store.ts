@@ -10,11 +10,13 @@ interface Location {
 }
 
 // Type for an asset type definition
+// Type for asset type definition
 interface AssetType<T = any> {
   id: number;
   name: string;
   fields: T;
 }
+
 
 // Type for asset count
 interface Count {
@@ -132,7 +134,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         system: "",
         health: "",
         ds: "",
-        ioConfig: ""
+        ioConfig: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -140,7 +144,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "clientsSummarySection",
       fields: {
         clients: "",
-        vendor: ""
+        vendor: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -153,7 +159,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         available: "",
         reservedOwner: "",
         purpose: "",
-        warrantyDetails: ""
+        warrantyDetails: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -161,7 +169,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "switchSummarySection",
       fields: {
         switches: "",
-        vendor: ""
+        vendor: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -172,7 +182,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         capacity: "",
         available: "",
         purpose: "",
-        warrantyDetails: ""
+        warrantyDetails: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -184,7 +196,8 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        busyQuantity: ""
+        busyQuantity: "", // Already has a busyQuantity field
+        description: ""
       }
     },
     {
@@ -196,7 +209,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        length: ""
+        length: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -206,7 +221,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -216,7 +233,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -224,7 +243,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "battery",
       fields: {
         partNumber3x5: "",
-        mfgPn: ""
+        mfgPn: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -232,7 +253,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "fans",
       fields: {
         partNumber3x5: "",
-        mfgPn: ""
+        mfgPn: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -240,7 +263,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "usbPendrives",
       fields: {
         capacity: "",
-        vendor: ""
+        vendor: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -250,7 +275,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -260,7 +287,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -270,7 +299,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -280,7 +311,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -290,7 +323,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -301,7 +336,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         partNumber3x5: "",
         mfgPn: "",
         vendor: "",
-        capacity: ""
+        capacity: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -309,7 +346,9 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "tools",
       fields: {
         toolName: "",
-        vendor: ""
+        vendor: "",
+        quantity: "", // Added quantity before description
+        description: ""
       }
     },
     {
@@ -317,6 +356,7 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "location",
       fields: {
         name: "",
+        quantity: "", // Added quantity before description
         description: ""
       }
     },
@@ -325,6 +365,7 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "row",
       fields: {
         name: "",
+        quantity: "", // Added quantity before description
         description: ""
       }
     },
@@ -333,6 +374,7 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "rack",
       fields: {
         name: "",
+        quantity: "", // Added quantity before description
         description: ""
       }
     },
@@ -341,10 +383,12 @@ export const useAssetStore = create<AssetStore>((set, get) => {
       name: "cupboard",
       fields: {
         name: "",
+        quantity: "", // Added quantity before description
         description: ""
       }
     }
   ];
+  
 
   // Define Initial Assets
   const initialAssets: Asset[] = [

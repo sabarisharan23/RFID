@@ -131,8 +131,8 @@ const AssetTable: React.FC = () => {
                 <th className="p-2 border border-gray-300 text-left">
                   Asset Name
                 </th>
-                <th className="p-2 border border-gray-300 text-left">RFID</th>
-                <th className="p-2 border border-gray-300 text-left">TYPE</th>
+                <th className="p-2 border border-gray-300 text-left">Tag ID</th>
+                <th className="p-2 border border-gray-300 text-left">Type</th>
                 <th className="p-2 border border-gray-300 text-left">
                   Location
                 </th>
