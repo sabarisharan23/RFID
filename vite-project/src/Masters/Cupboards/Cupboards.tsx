@@ -6,7 +6,7 @@ import * as XLSX from "xlsx";
 
 const CupboardsTable: React.FC = () => {
   const navigate = useNavigate();
-  const { getAssetsByType, getAssetByRFID } = useAssetStore();
+  const { getAssetsByType, getAssetByRFID ,deleteAsset} = useAssetStore();
   const cupboards = getAssetsByType(23); // Assuming 23 is the type ID for cupboards
 
   // State for search, entries per page, and current page
@@ -76,6 +76,12 @@ const CupboardsTable: React.FC = () => {
     XLSX.writeFile(wb, "Cupboards.xlsx");
   };
 
+
+  const handleDelete = (rfid: string) => {
+    if (window.confirm("Are you sure you want to delete this asset?")) {
+      deleteAsset(rfid);
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Page Title */}
@@ -175,14 +181,22 @@ const CupboardsTable: React.FC = () => {
                       <td className="p-2 border border-gray-300">
                         {cupboard.fields.description}
                       </td>
-                      <td className="p-2 border border-gray-300 flex justify-center">
+                      <td className="p-2 border border-gray-300 flex justify-center gap-5">
                         <button
-                          className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-1 px-3 rounded"
+                          className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-1 px-3 rounded "
                           onClick={() =>
                             navigate(`/edit-cupboards/${cupboard.RFID}`)
                           }
                         >
                           Edit
+                        </button>
+                        <button
+                      className="bg-[#E74C3C] hover:bg-[#C0392B] text-white py-2 px-4 rounded"
+                      onClick={() =>
+                            handleDelete(cupboard.RFID)
+                          }
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>

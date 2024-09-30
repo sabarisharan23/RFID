@@ -6,7 +6,7 @@ import * as XLSX from "xlsx";
 
 const Racks: React.FC = () => {
   const navigate = useNavigate();
-  const { getAssetsByType, getAssetByRFID } = useAssetStore();
+  const { getAssetsByType, getAssetByRFID,deleteAsset } = useAssetStore();
   const racks = getAssetsByType(22); // Assuming 22 is the type ID for racks
 
   // State for search, entries per page, and current page
@@ -24,6 +24,12 @@ const Racks: React.FC = () => {
   const handleEntriesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setEntriesPerPage(Number(e.target.value));
     setCurrentPage(1); // Reset to first page on entries change
+  };
+
+  const handleDelete = (rfid: string) => {
+    if (window.confirm("Are you sure you want to delete this asset?")) {
+      deleteAsset(rfid);
+    }
   };
 
   // Filtered racks based on search query
@@ -177,12 +183,18 @@ const Racks: React.FC = () => {
                       <td className="p-2 border border-gray-300">
                         {rack.fields.description}
                       </td>
-                      <td className="p-2 border border-gray-300 flex justify-center">
+                      <td className="p-2 border border-gray-300 flex justify-center gap-5">
                         <button
                           className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-1 px-3 rounded"
                           onClick={() => navigate(`/edit-racks/${rack.RFID}`)}
                         >
                           Edit
+                        </button>
+                        <button
+                      className="bg-[#E74C3C] hover:bg-[#C0392B] text-white py-2 px-4 rounded"
+                      onClick={() => handleDelete(rack.RFID)}
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>

@@ -5,7 +5,9 @@ import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjus
 
 const Location: React.FC = () => {
   const navigate = useNavigate();
-  const locations = useAssetStore((state) => state.getLocations()); // Retrieve locations from Zustand store
+  const locations = useAssetStore((state) => state.getLocations());
+  const { deleteLocation } = useAssetStore();
+  // Retrieve locations from Zustand store
   const [entries, setEntries] = useState<number>(10); // State for number of entries to show
 
   const downloadTableAsExcel = () => {
@@ -13,6 +15,11 @@ const Location: React.FC = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
     XLSX.writeFile(workbook, "locations_data.xlsx");
+  };
+  const handleDelete = (id:number) => {
+    if (window.confirm("Are you sure you want to delete this asset?")) {
+      deleteLocation(id);
+    }
   };
 
   return (
@@ -72,12 +79,18 @@ const Location: React.FC = () => {
                   <td className="p-2 border border-gray-300">
                     {location.description}
                   </td>
-                  <td className="p-2 border flex justify-center items-center border-gray-300">
+                  <td className="p-2 border flex justify-center items-center gap-5 border-gray-300 ">
                     <button
                       className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
                       onClick={() => navigate(`/edit-location/${location.id}`)}
                     >
                       Edit
+                    </button>
+                    <button
+                      className="bg-[#E74C3C] hover:bg-[#C0392B] text-white py-2 px-4 rounded"
+                      onClick={() => handleDelete (location.id)}
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
