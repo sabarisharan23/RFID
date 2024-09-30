@@ -49,6 +49,8 @@ const AssetForm: React.FC = () => {
 
   // Bulk upload state
   const [isBulkUpload, setIsBulkUpload] = useState(false);
+  const [bulkData, setBulkData] = useState<any[]>([]); // To store parsed Excel data
+  const [isBulkDataReady, setIsBulkDataReady] = useState(false); // To control table display
 
   // List of types to exclude
   const typesToExclude = ["location", "row", "rack", "cupboard"];
@@ -124,9 +126,13 @@ const AssetForm: React.FC = () => {
 
   // Utility function to format names
   const formatName = (name: string) => {
+    if (/^[A-Z]+$/.test(name)) {
+      return name; // Return the name as is if it contains only capital letters
+    }
+  
     return name
-      .replace(/([A-Z])/g, " $1") // Add space before capital letters
-      .trim() // Remove any leading/trailing whitespace
+      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .trim()
       .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
   };
 
@@ -181,16 +187,17 @@ const AssetForm: React.FC = () => {
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-          processBulkData(jsonData);
+          setBulkData(jsonData);
+          setIsBulkDataReady(true);
         }
       };
       reader.readAsBinaryString(file);
     }
   };
 
-  const processBulkData = (data: any[]) => {
-    data.forEach((row) => {
-      const rfid = row["RFID"];
+  const processBulkData = () => {
+    bulkData.forEach((row) => {
+      const rfid = `${row["RFID"]}`;
       if (!rfid) {
         console.error("RFID is missing in one of the rows.");
         return;
@@ -274,6 +281,16 @@ const AssetForm: React.FC = () => {
     navigate("/assets"); // Navigate back after processing
   };
 
+  const handleBulkSave = () => {
+    processBulkData();
+  };
+
+  const handleBulkCancel = () => {
+    setBulkData([]);
+    setIsBulkDataReady(false);
+    setIsBulkUpload(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-2xl font-semibold pb-2">
@@ -287,11 +304,77 @@ const AssetForm: React.FC = () => {
           <input
             type="checkbox"
             checked={isBulkUpload}
-            onChange={(e) => setIsBulkUpload(e.target.checked)}
+            onChange={(e) => {
+              setIsBulkUpload(e.target.checked);
+              // Reset bulk data when toggling bulk upload
+              if (!e.target.checked) {
+                setBulkData([]);
+                setIsBulkDataReady(false);
+              }
+            }}
           />
           <span className="text-lg font-medium text-gray-700">Bulk Upload</span>
         </label>
       </div>
+
+      {/* Display Bulk Data Review Table */}
+      {isBulkUpload && isBulkDataReady && (
+        <div className="bg-white shadow rounded p-6 mt-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Review Bulk Upload Data
+          </h2>
+          <div className="overflow-x-auto max-h-96">
+            <table className="min-w-full table-auto">
+              <thead className="sticky top-0 bg-gray-200">
+                <tr>
+                  {Object.keys(bulkData[0] || {}).map((key) => (
+                    <th
+                      key={key}
+                      className="px-4 py-2 border-b text-left text-sm font-medium text-gray-700"
+                    >
+                      {formatName(key)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {bulkData.map((row, index) => (
+                  <tr
+                    key={index}
+                    className={`hover:bg-gray-100 ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
+                  >
+                    {Object.keys(row).map((key) => (
+                      <td
+                        key={key}
+                        className="px-4 py-2 border-b text-sm text-gray-700"
+                      >
+                        {row[key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Bulk Save and Cancel Buttons */}
+          <div className="flex justify-end space-x-4 mt-4">
+            <button
+              onClick={handleBulkCancel}
+              className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleBulkSave}
+              className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+            >
+              Save Bulk Assets
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white mt-6 shadow rounded p-6">
         {/* Asset Details Section */}
@@ -331,7 +414,7 @@ const AssetForm: React.FC = () => {
             </div>
 
             {/* Bulk Upload Mode */}
-            {isBulkUpload ? (
+            {isBulkUpload && !isBulkDataReady ? (
               <div className="col-span-3 mt-4">
                 <label className="block text-sm font-medium text-gray-700">
                   Upload Excel File <span className="text-red-500">*</span>
@@ -343,7 +426,7 @@ const AssetForm: React.FC = () => {
                   className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
                 />
               </div>
-            ) : (
+            ) : !isBulkUpload ? (
               // Manual Entry Mode
               <>
                 {Object.keys(fields).map((fieldKey) => (
@@ -363,84 +446,86 @@ const AssetForm: React.FC = () => {
                   </div>
                 ))}
               </>
-            )}
+            ) : null}
           </div>
         </div>
 
         {/* Location Details Section */}
-        <div className="grid grid-cols-3 gap-6 mt-6">
-          {/* Row Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Row <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={selectedRowId}
-              onChange={(e) => setSelectedRowId(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              disabled={isBulkUpload} // Disable in bulk upload mode
-            >
-              <option value="" disabled>
-                Select Row
-              </option>
-              {rows.map((row) => (
-                <option key={row.RFID} value={row.RFID}>
-                  {formatName(row.fields.name)}{" "}
-                  {/* Assuming row has a name property */}
+        {!isBulkUpload && (
+          <div className="grid grid-cols-3 gap-6 mt-6">
+            {/* Row Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Row <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedRowId}
+                onChange={(e) => setSelectedRowId(e.target.value)}
+                className="block w-full border border-gray-300 rounded p-2 mt-1"
+                disabled={isBulkUpload} // Disable in bulk upload mode
+              >
+                <option value="" disabled>
+                  Select Row
                 </option>
-              ))}
-            </select>
-          </div>
+                {rows.map((row) => (
+                  <option key={row.RFID} value={row.RFID}>
+                    {formatName(row.fields.name)}{" "}
+                    {/* Assuming row has a name property */}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Rack Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Rack
-            </label>
-            <select
-              value={selectedRackId}
-              onChange={(e) => setSelectedRackId(e.target.value)}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              disabled={!selectedRowId || isBulkUpload} // Enable only if a row is selected and not in bulk upload mode
-            >
-              <option value="" disabled>
-                Select Rack
-              </option>
-              {racks.map((rack) => (
-                <option key={rack.RFID} value={rack.RFID}>
-                  {formatName(rack.fields.name)}{" "}
-                  {/* Assuming rack has a name property */}
+            {/* Rack Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Rack
+              </label>
+              <select
+                value={selectedRackId}
+                onChange={(e) => setSelectedRackId(e.target.value)}
+                className="block w-full border border-gray-300 rounded p-2 mt-1"
+                disabled={!selectedRowId || isBulkUpload} // Enable only if a row is selected and not in bulk upload mode
+              >
+                <option value="" disabled>
+                  Select Rack
                 </option>
-              ))}
-            </select>
-          </div>
+                {racks.map((rack) => (
+                  <option key={rack.RFID} value={rack.RFID}>
+                    {formatName(rack.fields.name)}{" "}
+                    {/* Assuming rack has a name property */}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Cupboard Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cupboard
-            </label>
-            <select
-              value={selectedCupboardId}
-              onChange={(e) => {
-                console.log("Cupboard selected:", e.target.value);
-                setSelectedCupboardId(e.target.value);
-              }}
-              className="block w-full border border-gray-300 rounded p-2 mt-1"
-              disabled={!selectedRackId || isBulkUpload} // Enable only if a rack is selected and not in bulk upload mode
-            >
-              <option value="" disabled>
-                Select Cupboard
-              </option>
-              {cupboards.map((cupboard) => (
-                <option key={cupboard.RFID} value={cupboard.RFID}>
-                  {formatName(cupboard.fields.name)}{" "}
-                  {/* Assuming cupboard has a name property */}
+            {/* Cupboard Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Cupboard
+              </label>
+              <select
+                value={selectedCupboardId}
+                onChange={(e) => {
+                  console.log("Cupboard selected:", e.target.value);
+                  setSelectedCupboardId(e.target.value);
+                }}
+                className="block w-full border border-gray-300 rounded p-2 mt-1"
+                disabled={!selectedRackId || isBulkUpload} // Enable only if a rack is selected and not in bulk upload mode
+              >
+                <option value="" disabled>
+                  Select Cupboard
                 </option>
-              ))}
-            </select>
+                {cupboards.map((cupboard) => (
+                  <option key={cupboard.RFID} value={cupboard.RFID}>
+                    {formatName(cupboard.fields.name)}{" "}
+                    {/* Assuming cupboard has a name property */}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* RFID Input */}
         {!isBulkUpload && (
