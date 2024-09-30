@@ -20,9 +20,17 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex justify-between items-center bg-[#ECF0F1] shadow p-6">
+    <div className="flex justify-between items-center bg-white shadow px-6 py-4">
       {/* Logo */}
-      <div className="text-2xl font-bold text-[#2C3E50]">Mindteck RFID</div>
+      <div className="text-2xl font-bold text-[#2C3E50]">
+      <div className="">
+          <img
+            src="/images.png"
+            alt="Mindteck Logo"
+            className=" w-[50%] "
+          />
+        </div>
+        </div>
 
       {/* Log Out Button */}
       <button className="flex justify-center items-center gap-2 text-black bg-white border border-gray-300 font-semibold  rounded px-2 py-1 shadow-md" onClick={() => navigate('/')}>
