@@ -25,8 +25,8 @@ const AssetTable: React.FC = () => {
       const typeName = getTypeById(asset.type)?.name || "";
       const location = getAssetByRFID(asset.parentId)?.fields.name || "-";
       const available = asset.isAvailable ? "Yes" : "No";
-
-      const searchString = `${name} ${rfid} ${typeName} ${location} ${available}`.toLowerCase();
+        const quantity = asset.fields.quantity || "-";
+      const searchString = `${name} ${rfid} ${typeName} ${location} ${available}  ${quantity}`.toLowerCase();
       return searchString.includes(searchQuery.toLowerCase());
     });
 
@@ -39,7 +39,7 @@ const AssetTable: React.FC = () => {
       const wb = XLSX.utils.book_new();
       
       // Get the table rows
-      const rows = table.rows ;
+      const rows = table.rows;
       
       // Prepare an array to store the modified table data
       const data = [];
@@ -139,6 +139,9 @@ const AssetTable: React.FC = () => {
                 <th className="p-2 border border-gray-300 text-left">
                   Available
                 </th>
+                <th className="p-2 border border-gray-300 text-left">
+                  Quantity
+                </th>
                 <th className="p-2 border border-gray-300 text-left" id="col">
                   Action
                 </th>
@@ -149,7 +152,7 @@ const AssetTable: React.FC = () => {
                 <tr key={asset.id} className="relative group item-center">
                   <td className="p-2 border border-gray-300">
                     {asset.fields.name || getTypeById(asset.type)?.name}
-                  </td>
+                  </td>  
                   <td className="p-2 border border-gray-300">{asset.RFID}</td>
                   <td className="p-2 border border-gray-300">
                     {getTypeById(asset.type)?.name}
@@ -159,6 +162,9 @@ const AssetTable: React.FC = () => {
                   </td>
                   <td className="p-2 border border-gray-300">
                     {asset.isAvailable ? "Yes" : "No"}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {asset.fields.quantity || "-"}
                   </td>
 
                   {/* Edit Button */}
