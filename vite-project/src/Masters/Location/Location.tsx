@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
-import { useAssetStore } from "../../store/store";
+import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 
 const Location: React.FC = () => {
   const navigate = useNavigate();
@@ -32,9 +32,7 @@ const Location: React.FC = () => {
           Export to Excel
         </button>
       </div>
-      <div className="flex justify-between items-center mb-4">
-       
-      </div>
+      <div className="flex justify-between items-center mb-4"></div>
       <div className="bg-white p-4 shadow rounded">
         <div className="flex items-center pb-3">
           <label htmlFor="entries" className="mr-2 text-gray-600">

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAssetStore } from "../../store/store";
+import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+
 import * as XLSX from "xlsx";
 
 const Racks: React.FC = () => {
@@ -33,7 +34,8 @@ const Racks: React.FC = () => {
         : "";
       const rackName = rack.fields.name || "";
       const rackDescription = rack.fields.description || "";
-      const searchStr = `${parent} ${rackName} ${rackDescription}`.toLowerCase();
+      const searchStr =
+        `${parent} ${rackName} ${rackDescription}`.toLowerCase();
       return searchStr.includes(searchQuery.toLowerCase());
     });
   }, [racks, searchQuery, getAssetByRFID]);
@@ -148,9 +150,7 @@ const Racks: React.FC = () => {
                 <th className="p-2 border border-gray-300 text-left">
                   Rack Description
                 </th>
-                <th className="p-2 border border-gray-300 text-left">
-                  Action
-                </th>
+                <th className="p-2 border border-gray-300 text-left">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -190,10 +190,7 @@ const Racks: React.FC = () => {
                 })
               ) : (
                 <tr>
-                  <td
-                    colSpan={4}
-                    className="p-4 text-center text-gray-600"
-                  >
+                  <td colSpan={4} className="p-4 text-center text-gray-600">
                     No racks found.
                   </td>
                 </tr>
@@ -206,10 +203,7 @@ const Racks: React.FC = () => {
         <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
           <span>
             Showing{" "}
-            {totalEntries > 0
-              ? (currentPage - 1) * entriesPerPage + 1
-              : 0}{" "}
-            to{" "}
+            {totalEntries > 0 ? (currentPage - 1) * entriesPerPage + 1 : 0} to{" "}
             {currentPage * entriesPerPage > totalEntries
               ? totalEntries
               : currentPage * entriesPerPage}{" "}

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAssetStore } from "../../store/store";
+import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+
 import * as XLSX from "xlsx";
 
 const AssetTable: React.FC = () => {
   const navigate = useNavigate();
   const { assets, getTypeById, getAssetByRFID } = useAssetStore();
   const [searchQuery, setSearchQuery] = useState("");
-
 
   // List of types to exclude
   const typesToExclude = ["location", "row", "rack", "cupboard"];
@@ -25,43 +25,43 @@ const AssetTable: React.FC = () => {
       const typeName = getTypeById(asset.type)?.name || "";
       const location = getAssetByRFID(asset.parentId)?.fields.name || "-";
       const available = asset.isAvailable ? "Yes" : "No";
-        const quantity = asset.fields.quantity || "-";
-      const searchString = `${name} ${rfid} ${typeName} ${location} ${available}  ${quantity}`.toLowerCase();
+      const quantity = asset.fields.quantity || "-";
+      const searchString =
+        `${name} ${rfid} ${typeName} ${location} ${available}  ${quantity}`.toLowerCase();
       return searchString.includes(searchQuery.toLowerCase());
     });
 
+  function downloadTableAsExcel() {
+    // Select the table element
+    const table = document.getElementById("myTable");
 
-    function downloadTableAsExcel() {
-      // Select the table element
-      const table = document.getElementById('myTable');
-      
-      // Create a new workbook
-      const wb = XLSX.utils.book_new();
-      
-      // Get the table rows
-      const rows = table.rows;
-      
-      // Prepare an array to store the modified table data
-      const data = [];
-  
-      // Loop through each row
-      for (let i = 0; i < rows.length; i++) {
-          const row = [];
-          // Loop through each cell, omitting the last one
-          for (let j = 0; j < rows[i].cells.length - 1; j++) {
-              row.push(rows[i].cells[j].innerText);
-          }
-          data.push(row); // Add the row to the data array
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
+
+    // Get the table rows
+    const rows = table.rows;
+
+    // Prepare an array to store the modified table data
+    const data = [];
+
+    // Loop through each row
+    for (let i = 0; i < rows.length; i++) {
+      const row = [];
+      // Loop through each cell, omitting the last one
+      for (let j = 0; j < rows[i].cells.length - 1; j++) {
+        row.push(rows[i].cells[j].innerText);
       }
-  
-      // Create worksheet from the modified data (without the last column)
-      const ws = XLSX.utils.aoa_to_sheet(data);
-  
-      // Append the worksheet to the workbook
-      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-  
-      // Generate Excel file and prompt download
-      XLSX.writeFile(wb, 'Assets.xlsx');
+      data.push(row); // Add the row to the data array
+    }
+
+    // Create worksheet from the modified data (without the last column)
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    // Generate Excel file and prompt download
+    XLSX.writeFile(wb, "Assets.xlsx");
   }
 
   return (
@@ -152,7 +152,7 @@ const AssetTable: React.FC = () => {
                 <tr key={asset.id} className="relative group item-center">
                   <td className="p-2 border border-gray-300">
                     {asset.fields.name || getTypeById(asset.type)?.name}
-                  </td>  
+                  </td>
                   <td className="p-2 border border-gray-300">{asset.RFID}</td>
                   <td className="p-2 border border-gray-300">
                     {getTypeById(asset.type)?.name}
@@ -188,8 +188,8 @@ const AssetTable: React.FC = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
           <span>
-            Showing {filteredAssets.length > 0 ? 1 : 0} to {filteredAssets.length} of{" "}
-            {assets.length} entries
+            Showing {filteredAssets.length > 0 ? 1 : 0} to{" "}
+            {filteredAssets.length} of {assets.length} entries
           </span>
           <div className="flex space-x-2">
             <button className="px-3 py-1 border rounded">Previous</button>

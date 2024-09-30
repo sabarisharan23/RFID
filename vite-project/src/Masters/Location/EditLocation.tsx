@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAssetStore } from "../../store/store";
+import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 
 const EditLocation: React.FC = () => {
   const { id } = useParams<{ id: string }>();

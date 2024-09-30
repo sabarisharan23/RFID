@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAssetStore } from "../store/store"; // Adjust the import path as needed
+import { useAssetStore } from "../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 import _ from "lodash"; // Import lodash for debouncing
 
 const AssetForm: React.FC = () => {

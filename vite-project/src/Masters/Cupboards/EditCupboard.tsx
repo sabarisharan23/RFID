@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAssetStore } from "../../store/store";
+import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 
 const EditCupboardForm: React.FC = () => {
   const navigate = useNavigate();
@@ -28,7 +28,11 @@ const EditCupboardForm: React.FC = () => {
 
   const handleUpdate = () => {
     // Basic validation
-    if (!cupboardName.trim() || !cupboardDescription.trim() || !parentRackRFID.trim()) {
+    if (
+      !cupboardName.trim() ||
+      !cupboardDescription.trim() ||
+      !parentRackRFID.trim()
+    ) {
       alert("Please fill out all required fields.");
       return;
     }
@@ -95,11 +99,14 @@ const EditCupboardForm: React.FC = () => {
                 Select Rack
               </option>
               {/* Fetch and list all racks for selection */}
-              {useAssetStore.getState().getAssetsByType(22).map((rack) => (
-                <option key={rack.RFID} value={rack.RFID}>
-                  {rack.fields.name}
-                </option>
-              ))}
+              {useAssetStore
+                .getState()
+                .getAssetsByType(22)
+                .map((rack) => (
+                  <option key={rack.RFID} value={rack.RFID}>
+                    {rack.fields.name}
+                  </option>
+                ))}
             </select>
           </div>
 

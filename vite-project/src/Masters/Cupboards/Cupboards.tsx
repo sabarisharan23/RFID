@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAssetStore } from "../../store/store";
+import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+
 import * as XLSX from "xlsx";
 
 const CupboardsTable: React.FC = () => {
@@ -33,7 +34,8 @@ const CupboardsTable: React.FC = () => {
         : "";
       const cupboardName = cupboard.fields.name || "";
       const cupboardDescription = cupboard.fields.description || "";
-      const searchStr = `${parentRack} ${cupboardName} ${cupboardDescription}`.toLowerCase();
+      const searchStr =
+        `${parentRack} ${cupboardName} ${cupboardDescription}`.toLowerCase();
       return searchStr.includes(searchQuery.toLowerCase());
     });
   }, [cupboards, searchQuery, getAssetByRFID]);
@@ -142,8 +144,12 @@ const CupboardsTable: React.FC = () => {
             <thead className="bg-gray-100 sticky top-0">
               <tr>
                 <th className="p-2 border border-gray-300 text-left">Rack</th>
-                <th className="p-2 border border-gray-300 text-left">Cupboard Name</th>
-                <th className="p-2 border border-gray-300 text-left">Cupboard Description</th>
+                <th className="p-2 border border-gray-300 text-left">
+                  Cupboard Name
+                </th>
+                <th className="p-2 border border-gray-300 text-left">
+                  Cupboard Description
+                </th>
                 <th className="p-2 border border-gray-300 text-left">Action</th>
               </tr>
             </thead>
@@ -172,7 +178,9 @@ const CupboardsTable: React.FC = () => {
                       <td className="p-2 border border-gray-300 flex justify-center">
                         <button
                           className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-1 px-3 rounded"
-                          onClick={() => navigate(`/edit-cupboards/${cupboard.RFID}`)}
+                          onClick={() =>
+                            navigate(`/edit-cupboards/${cupboard.RFID}`)
+                          }
                         >
                           Edit
                         </button>
@@ -195,10 +203,7 @@ const CupboardsTable: React.FC = () => {
         <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
           <span>
             Showing{" "}
-            {totalEntries > 0
-              ? (currentPage - 1) * entriesPerPage + 1
-              : 0}{" "}
-            to{" "}
+            {totalEntries > 0 ? (currentPage - 1) * entriesPerPage + 1 : 0} to{" "}
             {currentPage * entriesPerPage > totalEntries
               ? totalEntries
               : currentPage * entriesPerPage}{" "}
@@ -217,19 +222,21 @@ const CupboardsTable: React.FC = () => {
               Previous
             </button>
             {/* Display page numbers */}
-            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-3 py-1 border rounded ${
-                  currentPage === page
-                    ? "bg-blue-500 text-white"
-                    : "bg-white hover:bg-gray-100"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-3 py-1 border rounded ${
+                    currentPage === page
+                      ? "bg-blue-500 text-white"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages || totalPages === 0}
