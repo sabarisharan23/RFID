@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 import * as XLSX from "xlsx";
+import ActionButton from "../../Components/Buttons";
 
 const AssetTable: React.FC = () => {
   const navigate = useNavigate();
@@ -59,18 +60,10 @@ const AssetTable: React.FC = () => {
       <div>
         <h1 className="text-2xl font-semibold pb-4">Assets</h1>
         <div className="space-x-4 pb-6">
-          <button
-            className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
-            onClick={() => navigate("/add-assets")}
-          >
-            Add
-          </button>
-          <button
-            className="bg-[#F39C12] hover:bg-[#E67E22] text-white py-2 px-4 rounded"
-            onClick={downloadTableAsExcel}
-          >
-            Excel
-          </button>
+          
+          <ActionButton type="add" onClick={() => navigate("/add-assets")} />
+          <ActionButton type="excel" onClick={downloadTableAsExcel} />
+          
         </div>
       </div>
 
@@ -81,7 +74,7 @@ const AssetTable: React.FC = () => {
               Show
             </label>
             <select id="entries" className="border border-gray-300 rounded p-1 text-sm">
-              <option value="10">10</option>
+              <option value="10">10</option> 
               <option value="25">25</option>
               <option value="50">50</option>
             </select>
@@ -140,20 +133,8 @@ const AssetTable: React.FC = () => {
                   </td>
 
                   <td className="p-2 border border-gray-200 justify-center flex space-x-2">
-                    <button
-                      className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
-                      onClick={() => navigate(`/edit-assets/${asset.RFID}`)}
-                    >
-                      Edit
-                    </button>
-
-                    {/* Delete Button */}
-                    <button
-                      className="bg-[#E74C3C] hover:bg-[#C0392B] text-white py-2 px-4 rounded"
-                      onClick={() => handleDelete(asset.RFID)}
-                    >
-                      Delete
-                    </button>
+                    <ActionButton type="edit" onClick={() => navigate(`/edit-assets/${asset.RFID}`)} />
+                    <ActionButton type="delete" onClick={() => handleDelete(asset.RFID)} />
                   </td>
                 </tr>
               ))}

@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 
 import * as XLSX from "xlsx";
+import ActionButton from "../../Components/Buttons";
 
-const Racks: React.FC = () => {
+const CupboardsTable: React.FC = () => {
   const navigate = useNavigate();
-  const { getAssetsByType, getAssetByRFID,deleteAsset } = useAssetStore();
-  const racks = getAssetsByType(22); // Assuming 22 is the type ID for racks
+  const { getAssetsByType, getAssetByRFID ,deleteAsset} = useAssetStore();
+  const cupboards = getAssetsByType(23); // Assuming 23 is the type ID for cupboards
 
   // State for search, entries per page, and current page
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,33 +27,27 @@ const Racks: React.FC = () => {
     setCurrentPage(1); // Reset to first page on entries change
   };
 
-  const handleDelete = (rfid: string) => {
-    if (window.confirm("Are you sure you want to delete this asset?")) {
-      deleteAsset(rfid);
-    }
-  };
-
-  // Filtered racks based on search query
-  const filteredRacks = useMemo(() => {
-    return racks.filter((rack) => {
-      const parent = rack.parentId
-        ? getAssetByRFID(rack.parentId)?.fields.name || ""
+  // Filtered cupboards based on search query
+  const filteredCupboards = useMemo(() => {
+    return cupboards.filter((cupboard) => {
+      const parentRack = cupboard.parentId
+        ? getAssetByRFID(cupboard.parentId)?.fields.name || ""
         : "";
-      const rackName = rack.fields.name || "";
-      const rackDescription = rack.fields.description || "";
+      const cupboardName = cupboard.fields.name || "";
+      const cupboardDescription = cupboard.fields.description || "";
       const searchStr =
-        `${parent} ${rackName} ${rackDescription}`.toLowerCase();
+        `${parentRack} ${cupboardName} ${cupboardDescription}`.toLowerCase();
       return searchStr.includes(searchQuery.toLowerCase());
     });
-  }, [racks, searchQuery, getAssetByRFID]);
+  }, [cupboards, searchQuery, getAssetByRFID]);
 
   // Calculate pagination details
-  const totalEntries = filteredRacks.length;
+  const totalEntries = filteredCupboards.length;
   const totalPages = Math.ceil(totalEntries / entriesPerPage);
-  const paginatedRacks = useMemo(() => {
+  const paginatedCupboards = useMemo(() => {
     const startIdx = (currentPage - 1) * entriesPerPage;
-    return filteredRacks.slice(startIdx, startIdx + entriesPerPage);
-  }, [filteredRacks, currentPage, entriesPerPage]);
+    return filteredCupboards.slice(startIdx, startIdx + entriesPerPage);
+  }, [filteredCupboards, currentPage, entriesPerPage]);
 
   // Handler for page navigation
   const handlePageChange = (page: number) => {
@@ -61,9 +56,9 @@ const Racks: React.FC = () => {
   };
 
   // Export table data to Excel
-  function downloadTableAsExcel() {
+  const downloadTableAsExcel = () => {
     // Select the table element
-    const table = document.getElementById("racksTable");
+    const table = document.getElementById("cupboardsTable");
     if (!table) {
       console.error("Table not found!");
       return;
@@ -76,31 +71,28 @@ const Racks: React.FC = () => {
     const ws = XLSX.utils.table_to_sheet(table, { raw: true });
 
     // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(wb, ws, "Racks");
+    XLSX.utils.book_append_sheet(wb, ws, "Cupboards");
 
     // Generate Excel file and prompt download
-    XLSX.writeFile(wb, "Racks.xlsx");
-  }
+    XLSX.writeFile(wb, "Cupboards.xlsx");
+  };
 
+
+  const handleDelete = (rfid: string) => {
+    if (window.confirm("Are you sure you want to delete this asset?")) {
+      deleteAsset(rfid);
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Page Title */}
-      <div className="text-2xl font-semibold">Racks</div>
+      <div className="text-3xl font-semibold">Cupboards</div>
 
       {/* Action Buttons */}
-      <div className="flex space-x-4 mt-4">
-        <button
-          className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
-          onClick={() => navigate("/add-racks")}
-        >
-          Add
-        </button>
-        <button
-          className="bg-[#F39C12] hover:bg-[#E67E22] text-white py-2 px-4 rounded"
-          onClick={downloadTableAsExcel}
-        >
-          Export to Excel
-        </button>
+      <div className="flex space-x-4 mt-4">     
+        <ActionButton type="add"  onClick={() => navigate("/add-cupboards")} />
+        <ActionButton type="excel" onClick={downloadTableAsExcel} />
+
       </div>
 
       {/* Table */}
@@ -145,57 +137,47 @@ const Racks: React.FC = () => {
         <div className="overflow-x-auto max-h-96">
           <table
             className="min-w-full table-auto border-collapse border border-gray-300"
-            id="racksTable"
+            id="cupboardsTable"
           >
             <thead className="bg-gray-100 sticky top-0">
               <tr>
-                <th className="p-2 border border-gray-300 text-left">Row</th>
+                <th className="p-2 border border-gray-300 text-left">Rack</th>
                 <th className="p-2 border border-gray-300 text-left">
-                  Rack Name
+                  Cupboard Name
                 </th>
                 <th className="p-2 border border-gray-300 text-left">
-                  Rack Description
+                  Cupboard Description
                 </th>
                 <th className="p-2 border border-gray-300 text-left">Action</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedRacks.length > 0 ? (
-                paginatedRacks.map((rack) => {
-                  const parent = rack.parentId
-                    ? getAssetByRFID(rack.parentId)
+              {paginatedCupboards.length > 0 ? (
+                paginatedCupboards.map((cupboard, index) => {
+                  const parentRack = cupboard.parentId
+                    ? getAssetByRFID(cupboard.parentId)
                     : null;
                   return (
                     <tr
-                      key={rack.RFID}
+                      key={cupboard.RFID}
                       className={`border-t ${
-                        paginatedRacks.indexOf(rack) % 2 === 0
-                          ? "bg-white"
-                          : "bg-gray-50"
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
                       } hover:bg-gray-100`}
                     >
                       <td className="p-2 border border-gray-300">
-                        {parent ? parent.fields.name : "N/A"}
+                        {parentRack ? parentRack.fields.name : "N/A"}
                       </td>
                       <td className="p-2 border border-gray-300">
-                        {rack.fields.name}
+                        {cupboard.fields.name}
                       </td>
                       <td className="p-2 border border-gray-300">
-                        {rack.fields.description}
+                        {cupboard.fields.description}
                       </td>
                       <td className="p-2 border border-gray-300 flex justify-center gap-5">
-                        <button
-                          className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-1 px-3 rounded"
-                          onClick={() => navigate(`/edit-racks/${rack.RFID}`)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                      className="bg-[#E74C3C] hover:bg-[#C0392B] text-white py-2 px-4 rounded"
-                      onClick={() => handleDelete(rack.RFID)}
-                        >
-                          Delete
-                        </button>
+                        
+                        <ActionButton type="edit" onClick={() => navigate(`/edit-cupboards/${cupboard.RFID}`)} />
+                        <ActionButton type="delete" onClick={() => handleDelete(cupboard.RFID)} />
+
                       </td>
                     </tr>
                   );
@@ -203,7 +185,7 @@ const Racks: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={4} className="p-4 text-center text-gray-600">
-                    No racks found.
+                    No cupboards found.
                   </td>
                 </tr>
               )}
@@ -267,4 +249,4 @@ const Racks: React.FC = () => {
   );
 };
 
-export default Racks;
+export default CupboardsTable;

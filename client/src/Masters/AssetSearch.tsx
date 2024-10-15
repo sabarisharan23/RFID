@@ -1,106 +1,41 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAssetStore } from "../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import _ from "lodash"; // Import lodash for debouncing
+import ActionButton from "../Components/Buttons";
 
-// Define types for AssetField and Asset
-interface AssetFields {
-  [key: string]: string;
-}
-
-interface Asset {
-  RFID: string;
-  type: number;
-  fields: AssetFields;
-  parentId?: string;
-}
-
-interface AssetType {
-  id: number;
-  name: string;
-  fields: AssetFields;
-}
-
-const EditAssets: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Get RFID or asset ID from URL (for editing mode)
-  const { assetType, updateAsset, getAssetByRFID, getAssetsByParentId } =
-    useAssetStore();
+const AssetForm: React.FC = () => {
+  const {
+    assetType,
+    addAsset,
+    getAssetsByParentId,
+    getAssetByRFID,
+    assets, // Access all assets
+  } = useAssetStore();
   const navigate = useNavigate();
 
   // Form state
-  const [rfid, setRfid] = useState(id || ""); // Set RFID from URL if in edit mode
-  const [selectedAssetTypeId, setSelectedAssetTypeId] = useState<number>(
-    assetType[0]?.id || 0
+  const [rfid, setRfid] = useState("");
+  const [selectedAssetTypeId, setSelectedAssetTypeId] = useState(
+    assetType[0]?.id || ""
   );
-  const [fields, setFields] = useState<AssetFields>({});
+  const [fields, setFields] = useState(assetType[0]?.fields || {});
 
   // States for dropdown options
-  const [rows, setRows] = useState<Asset[]>([]);
+  const [rows, setRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState("");
-  const [racks, setRacks] = useState<Asset[]>([]);
+  const [racks, setRacks] = useState([]);
   const [selectedRackId, setSelectedRackId] = useState("");
-  const [cupboards, setCupboards] = useState<Asset[]>([]);
   const [selectedCupboardId, setSelectedCupboardId] = useState("");
+  const [cupboards, setCupboards] = useState([]);
 
-  // Load asset data if editing (id is present)
-  useEffect(() => {
-    const loadAssetData = async () => {
-      if (id) {
-        const fetchedAsset = getAssetByRFID(id);
-        if (fetchedAsset) {
-          setRfid(fetchedAsset.RFID);
-          setSelectedAssetTypeId(fetchedAsset.type);
-          setFields(fetchedAsset.fields);
+  // State for handling search and error messages
+  const [searchError, setSearchError] = useState("");
 
-          let cupboardId = fetchedAsset.parentId;
-          let rackId = "";
-          let rowId = "";
-          const labId = "1234567890"; // Lab's RFID
-
-          // Set selectedCupboardId
-          if (cupboardId) {
-            setSelectedCupboardId(cupboardId);
-            const cupboard = getAssetByRFID(cupboardId);
-
-            // Set selectedRackId
-            if (cupboard && cupboard.parentId) {
-              rackId = cupboard.parentId;
-              setSelectedRackId(rackId);
-              const rack = getAssetByRFID(rackId);
-
-              // Set selectedRowId
-              if (rack && rack.parentId) {
-                rowId = rack.parentId;
-                setSelectedRowId(rowId);
-              }
-            }
-          }
-
-          // Fetch rows using labId
-          const fetchedRows = await getAssetsByParentId(labId);
-          setRows(fetchedRows);
-
-          // Fetch racks if rowId is available
-          if (rowId) {
-            const fetchedRacks = await getAssetsByParentId(rowId);
-            setRacks(fetchedRacks);
-          }
-
-          // Fetch cupboards if rackId is available
-          if (rackId) {
-            const fetchedCupboards = await getAssetsByParentId(rackId);
-            setCupboards(fetchedCupboards);
-          }
-        }
-      }
-    };
-    loadAssetData();
-  }, [id, getAssetByRFID, getAssetsByParentId]);
-
-  // Fetch rows on component mount (for creating a new asset)
+  // Fetch rows by parent ID
   useEffect(() => {
     const fetchRows = async () => {
-      const labId = "1234567890"; // Lab's RFID
-      const fetchedRows = await getAssetsByParentId(labId);
+      const fetchedRows = await getAssetsByParentId("1234567890"); // Fetch rows using parent ID
       setRows(fetchedRows);
     };
     fetchRows();
@@ -110,10 +45,11 @@ const EditAssets: React.FC = () => {
   useEffect(() => {
     const fetchRacks = async () => {
       if (selectedRowId) {
-        const fetchedRacks = await getAssetsByParentId(selectedRowId);
+        const fetchedRacks = await getAssetsByParentId(selectedRowId); // Fetch racks using selected row ID
         setRacks(fetchedRacks);
-      } else {
-        setRacks([]);
+        setCupboards([]); // Reset cupboards when row changes
+        setSelectedRackId(""); // Reset selected rack
+        setSelectedCupboardId(""); // Reset cupboard
       }
     };
     fetchRacks();
@@ -123,10 +59,13 @@ const EditAssets: React.FC = () => {
   useEffect(() => {
     const fetchCupboards = async () => {
       if (selectedRackId) {
-        const fetchedCupboards = await getAssetsByParentId(selectedRackId);
+        const fetchedCupboards = await getAssetsByParentId(selectedRackId); // Fetch cupboards using selected rack ID
         setCupboards(fetchedCupboards);
-      } else {
-        setCupboards([]);
+        if (fetchedCupboards.length > 0) {
+          setSelectedCupboardId(fetchedCupboards[0].RFID);
+        } else {
+          setSelectedCupboardId("");
+        }
       }
     };
     fetchCupboards();
@@ -149,16 +88,13 @@ const EditAssets: React.FC = () => {
   };
 
   const handleSave = () => {
-    if (id) {
-      // If an id is present, update the existing asset
-      updateAsset(rfid, fields, selectedCupboardId);
-      console.log("Asset updated:", {
-        rfid,
-        selectedAssetTypeId,
-        fields,
-        selectedCupboardId,
-      });
-    }
+    addAsset(rfid, selectedAssetTypeId, fields, selectedCupboardId);
+    console.log("Asset added:", {
+      rfid,
+      selectedAssetTypeId,
+      fields,
+      selectedCupboardId,
+    });
     navigate("/assets"); // Navigate back after saving
   };
 
@@ -170,20 +106,110 @@ const EditAssets: React.FC = () => {
     console.log("Scan button clicked"); // Placeholder for actual scanning logic
   };
 
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    _.debounce((rfidInput: string) => {
+      if (!rfidInput.trim()) {
+        setSearchError("Please enter an RFID");
+        setFields(
+          assetType.find((at) => at.id === selectedAssetTypeId)?.fields || {}
+        );
+        setSelectedCupboardId("");
+        setSelectedRackId("");
+        setSelectedRowId("");
+        return;
+      }
+      const foundAsset = getAssetByRFID(rfidInput.trim());
+      if (foundAsset) {
+        // Asset found, populate the form
+        setSelectedAssetTypeId(foundAsset.type);
+        setFields(foundAsset.fields);
+
+        // Traverse the parent hierarchy to find Cupboard, Rack, and Row
+        let currentAsset = foundAsset;
+        let cupboardId = "";
+        let rackId = "";
+        let rowId = "";
+
+        while (currentAsset.parentId) {
+          const parentAsset = assets.find(
+            (asset) => asset.RFID === currentAsset.parentId
+          );
+          if (!parentAsset) break;
+
+          if (parentAsset.type === 23) {
+            // Cupboard
+            cupboardId = parentAsset.RFID;
+          } else if (parentAsset.type === 22) {
+            // Rack
+            rackId = parentAsset.RFID;
+          } else if (parentAsset.type === 21) {
+            // Row
+            rowId = parentAsset.RFID;
+          }
+
+          currentAsset = parentAsset;
+        }
+
+        setSelectedRowId(rowId);
+        setSelectedRackId(rackId);
+        setSelectedCupboardId(cupboardId);
+
+        setSearchError(""); // Clear any previous errors
+      } else {
+        // Asset not found
+        setSearchError("No match found for this RFID");
+        setFields(
+          assetType.find((at) => at.id === selectedAssetTypeId)?.fields || {}
+        );
+        setSelectedCupboardId("");
+        setSelectedRackId("");
+        setSelectedRowId("");
+      }
+    }, 500),
+    [rfid, assets, assetType, selectedAssetTypeId]
+  );
+
+  // Handle RFID input change with debouncing
+  useEffect(() => {
+    debouncedSearch(rfid);
+    // Cleanup function to cancel debounce if RFID changes before timeout
+    return debouncedSearch.cancel;
+  }, [rfid, debouncedSearch]);
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-2xl font-semibold pb-2">
-        {id ? "Edit Asset" : "Add Asset"}{" "}
-        {/* Change title based on whether it's edit or add */}
-      </h1>
+      <h1 className="text-2xl font-semibold pb-2">Assets Search</h1>
       <div className="bg-white mt-6 shadow rounded p-6">
+        {/* RFID Input moved to the top */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700">
+            RFID <span className="text-red-500">*</span>
+          </label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={rfid}
+              onChange={(e) => {
+                setRfid(e.target.value);
+                setSearchError(""); // Clear error when RFID changes
+              }}
+              className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
+              placeholder="Enter RFID"
+            />
+          
+            <ActionButton type="save"label="Search" onClick={handleScan} /> 
+          </div>
+          {searchError && <p className="text-red-500 mt-2">{searchError}</p>}
+        </div>
+
         {/* Render Dynamic Fields Based on Selected Asset Type */}
         <div className="col-span-3 border border-gray-300 rounded p-4 mt-6">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">
             Asset Details
           </h2>
           <div className="grid grid-cols-3 gap-4">
-            {/* Asset Type Dropdown moved here */}
+            {/* Asset Type Dropdown */}
             <div className="col-span-3">
               <label className="block text-sm font-medium text-gray-700">
                 Asset Type <span className="text-red-500">*</span>
@@ -201,7 +227,6 @@ const EditAssets: React.FC = () => {
                   }
                 }}
                 className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
-                disabled // Disable changing asset type during edit
               >
                 <option value="" disabled>
                   Select Asset Type
@@ -242,8 +267,8 @@ const EditAssets: React.FC = () => {
               value={selectedRowId}
               onChange={(e) => {
                 setSelectedRowId(e.target.value);
-                setSelectedRackId("");
-                setSelectedCupboardId("");
+                setSelectedRackId(""); // Reset rack when row changes
+                setSelectedCupboardId(""); // Reset cupboard when row changes
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
             >
@@ -252,8 +277,7 @@ const EditAssets: React.FC = () => {
               </option>
               {rows.map((row) => (
                 <option key={row.RFID} value={row.RFID}>
-                  {formatName(row.fields.name)}{" "}
-                  {/* Assuming row has a name property */}
+                  {formatName(row.fields.name)}
                 </option>
               ))}
             </select>
@@ -268,7 +292,7 @@ const EditAssets: React.FC = () => {
               value={selectedRackId}
               onChange={(e) => {
                 setSelectedRackId(e.target.value);
-                setSelectedCupboardId("");
+                setSelectedCupboardId(""); // Reset cupboard when rack changes
               }}
               className="block w-full border border-gray-300 rounded p-2 mt-1"
               disabled={!selectedRowId} // Enable only if a row is selected
@@ -278,8 +302,7 @@ const EditAssets: React.FC = () => {
               </option>
               {racks.map((rack) => (
                 <option key={rack.RFID} value={rack.RFID}>
-                  {formatName(rack.fields.name)}{" "}
-                  {/* Assuming rack has a name property */}
+                  {formatName(rack.fields.name)}
                 </option>
               ))}
             </select>
@@ -304,58 +327,23 @@ const EditAssets: React.FC = () => {
               </option>
               {cupboards.map((cupboard) => (
                 <option key={cupboard.RFID} value={cupboard.RFID}>
-                  {formatName(cupboard.fields.name)}{" "}
-                  {/* Assuming cupboard has a name property */}
+                  {formatName(cupboard.fields.name)}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* RFID Input moved to the last position */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700">
-            RFID <span className="text-red-500">*</span>
-          </label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              value={rfid}
-              onChange={(e) => setRfid(e.target.value)}
-              className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
-              placeholder="Enter RFID"
-              disabled // Disable changing RFID during edit
-            />
-            <button
-              onClick={handleScan}
-              className="bg-[#6C5CE7] hover:bg-[#5B4BCE] text-white py-2 px-4 rounded"
-              disabled // Disable scan button during edit
-            >
-              Scan
-            </button>
-          </div>
-        </div>
-
         {/* Buttons */}
         <div className="flex justify-end space-x-4 mt-6">
-          <button
-            onClick={handleBack}
-            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
-          >
-            Back
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-[#635bff] text-white px-4 py-2 rounded"
-          >
-            Update {/* Since this is EditAssets, button text is 'Update' */}
-          </button>
+       
+          <ActionButton type="back" onClick={handleBack} />
+          
+          <ActionButton type="save" onClick={handleSave} />
         </div>
       </div>
-
-      {/* Footer */}
     </div>
   );
 };
 
-export default EditAssets;
+export default AssetForm;

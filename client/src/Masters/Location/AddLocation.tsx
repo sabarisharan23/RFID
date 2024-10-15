@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAssetStore } from '../../store/zustendStore/useAssetStore'; // Adjust the import path as needed
+import ActionButton from '../../Components/Buttons';
 const AddLocation: React.FC = () => {
   const [locationName, setLocationName] = useState('');
   const [locationDescription, setLocationDescription] = useState('');
@@ -53,18 +54,10 @@ const AddLocation: React.FC = () => {
           </div>
         </div>
         <div className="flex justify-end space-x-4 mt-6">
-          <button
-            onClick={handleBack}
-            className="bg-teal-500 text-white px-4 py-2 rounded-md"
-          >
-            Back
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-purple-500 text-white px-4 py-2 rounded-md"
-          >
-            Save
-          </button>
+         
+          <ActionButton type='back' onClick={handleBack} />
+          <ActionButton type="save" onClick={handleSave} />
+          
         </div>
       </div>
     </div>

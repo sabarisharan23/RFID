@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import ActionButton from "../../Components/Buttons";
 
 const EditCupboardForm: React.FC = () => {
   const navigate = useNavigate();
@@ -127,24 +128,11 @@ const EditCupboardForm: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-4 mt-6">
-          <button
-            onClick={handleBack}
-            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
-          >
-            Back
-          </button>
-          <button
-            onClick={handleUpdate}
-            className="bg-[#6C5CE7] hover:bg-[#5B4BCE] text-white py-2 px-4 rounded"
-          >
-            Update
-          </button>
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-          >
-            Delete
-          </button>
+         
+          <ActionButton type="back" onClick={handleBack} />
+          <ActionButton type="save" onClick={handleUpdate} />
+          <ActionButton type="delete" onClick={handleDelete} />
+          
         </div>
       </div>
     </div>

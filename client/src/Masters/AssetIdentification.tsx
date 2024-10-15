@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useAssetStore } from '../store/zustendStore/useAssetStore'; // Adjust the import path as needed
-import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx'; // Import XLSX for Excel export
+import React, { useState } from "react";
+import { useAssetStore } from "../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx"; // Import XLSX for Excel export
+import ActionButton from "../Components/Buttons";
 
 interface HierarchyData {
   location?: any;
@@ -20,12 +21,16 @@ const AssetIdentification: React.FC = () => {
     assets,
     assetType,
   } = useAssetStore();
-  const [rfid, setRfid] = useState('');
-  const [searchError, setSearchError] = useState('');
-  const [hierarchyData, setHierarchyData] = useState<HierarchyData | null>(null);
+  const [rfid, setRfid] = useState("");
+  const [searchError, setSearchError] = useState("");
+  const [hierarchyData, setHierarchyData] = useState<HierarchyData | null>(
+    null
+  );
   const navigate = useNavigate();
 
-  const [selectedAssets, setSelectedAssets] = useState<{ [key: string]: boolean }>({});
+  const [selectedAssets, setSelectedAssets] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   // Function to get the parent hierarchy of an asset
   const getParentHierarchy = (asset) => {
@@ -37,13 +42,13 @@ const AssetIdentification: React.FC = () => {
       if (!parentAsset) break;
 
       if (parentAsset.type === 20) {
-        hierarchy['location'] = parentAsset;
+        hierarchy["location"] = parentAsset;
       } else if (parentAsset.type === 21) {
-        hierarchy['row'] = parentAsset;
+        hierarchy["row"] = parentAsset;
       } else if (parentAsset.type === 22) {
-        hierarchy['rack'] = parentAsset;
+        hierarchy["rack"] = parentAsset;
       } else if (parentAsset.type === 23) {
-        hierarchy['cupboard'] = parentAsset;
+        hierarchy["cupboard"] = parentAsset;
       }
 
       currentAsset = parentAsset;
@@ -77,7 +82,7 @@ const AssetIdentification: React.FC = () => {
 
   const handleSearch = async () => {
     if (!rfid.trim()) {
-      setSearchError('Please enter an ID');
+      setSearchError("Please enter an ID");
       setHierarchyData(null);
       return;
     }
@@ -121,14 +126,14 @@ const AssetIdentification: React.FC = () => {
         });
       } else {
         // The scanned ID is a Location or invalid type
-        setSearchError('Please scan a valid Asset, Cupboard, Rack, or Row');
+        setSearchError("Please scan a valid Asset, Cupboard, Rack, or Row");
         setHierarchyData(null);
       }
 
-      setSearchError('');
+      setSearchError("");
       setSelectedAssets({}); // Reset selected assets when new search is made
     } else {
-      setSearchError('No asset found with this ID');
+      setSearchError("No asset found with this ID");
       setHierarchyData(null);
     }
   };
@@ -142,9 +147,9 @@ const AssetIdentification: React.FC = () => {
     if (/^[A-Z]+$/.test(name)) {
       return name; // Return the name as is if it contains only capital letters
     }
-  
+
     return name
-      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .replace(/([A-Z])/g, " $1") // Add space before capital letters
       .trim()
       .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
   };
@@ -172,13 +177,15 @@ const AssetIdentification: React.FC = () => {
         if (exportAll) {
           assetsToExport = hierarchyData.assets;
         } else {
-          assetsToExport = hierarchyData.assets.filter((asset) => selectedAssets[asset.RFID]);
+          assetsToExport = hierarchyData.assets.filter(
+            (asset) => selectedAssets[asset.RFID]
+          );
         }
       }
     }
 
     if (assetsToExport.length === 0) {
-      alert('No assets available for export.');
+      alert("No assets available for export.");
       return;
     }
 
@@ -189,11 +196,11 @@ const AssetIdentification: React.FC = () => {
     const data = assetsToExport.map((asset) => {
       const parentHierarchy = getParentHierarchy(asset);
       const assetData = {
-        Location: parentHierarchy.location?.fields.name || '',
-        Row: parentHierarchy.row?.fields.name || '',
-        Rack: parentHierarchy.rack?.fields.name || '',
-        Cupboard: parentHierarchy.cupboard?.fields.name || '',
-        AssetType: formatName(getTypeById(asset.type)?.name || ''),
+        Location: parentHierarchy.location?.fields.name || "",
+        Row: parentHierarchy.row?.fields.name || "",
+        Rack: parentHierarchy.rack?.fields.name || "",
+        Cupboard: parentHierarchy.cupboard?.fields.name || "",
+        AssetType: formatName(getTypeById(asset.type)?.name || ""),
         RFID: asset.RFID,
         ...asset.fields,
       };
@@ -204,17 +211,22 @@ const AssetIdentification: React.FC = () => {
     const headers = Object.keys(data[0]);
 
     // Convert data to worksheet
-    const worksheetData = [headers, ...data.map((row) => headers.map((header) => row[header]))];
+    const worksheetData = [
+      headers,
+      ...data.map((row) => headers.map((header) => row[header])),
+    ];
 
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Assets');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Assets");
 
     // Export to Excel
-    XLSX.writeFile(workbook, 'assets_export.xlsx');
+    XLSX.writeFile(workbook, "assets_export.xlsx");
   };
 
   // Check if any assets are selected for export
-  const isExportDisabled = !Object.values(selectedAssets).some((isSelected) => isSelected);
+  const isExportDisabled = !Object.values(selectedAssets).some(
+    (isSelected) => isSelected
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -233,12 +245,8 @@ const AssetIdentification: React.FC = () => {
               className="block w-full max-w-[450px] border border-gray-300 rounded p-2 mt-1"
               placeholder="Enter ID"
             />
-            <button
-              onClick={handleSearch}
-              className="bg-[#6C5CE7] hover:bg-[#5B4BCE] text-white py-2 px-4 rounded"
-            >
-              Identify
-            </button>
+
+            <ActionButton type="save" onClick={handleSearch} label="Identify" />
           </div>
           {searchError && <p className="text-red-500 mt-2">{searchError}</p>}
         </div>
@@ -246,21 +254,21 @@ const AssetIdentification: React.FC = () => {
         {/* Export Buttons */}
         {hierarchyData && (
           <div className="mt-4 flex space-x-2">
-            <button
-              onClick={() => exportToExcel(false)} // Export selected assets
-              className={`bg-yellow-500 text-white px-4 py-2 rounded ${
-                isExportDisabled ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+           
+            <ActionButton
+              type="excel"
+              onClick={() => exportToExcel(false)}
               disabled={isExportDisabled}
-            >
-              Export Selected to Excel
-            </button>
-            <button
-              onClick={() => exportToExcel(true)} // Export all assets
-              className="bg-yellow-500 text-white px-4 py-2 rounded"
-            >
-              Export All to Excel
-            </button>
+              className={`${
+                isExportDisabled ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            />{" "}
+          
+            <ActionButton
+              type="excel"
+              onClick={() => exportToExcel(true)}
+              label="Export All"
+            />
           </div>
         )}
 
@@ -271,12 +279,13 @@ const AssetIdentification: React.FC = () => {
             <div className="bg-gray-50 p-4 rounded">
               <h3 className="font-semibold text-lg">Asset Hierarchy</h3>
               <div className="flex flex-wrap">
-                {['location', 'row', 'rack', 'cupboard'].map((level) => {
+                {["location", "row", "rack", "cupboard"].map((level) => {
                   const asset = hierarchyData[level];
                   if (asset) {
                     return (
                       <div key={level} className="mr-4">
-                        <strong>{formatName(level)}:</strong> {asset.fields.name}
+                        <strong>{formatName(level)}:</strong>{" "}
+                        {asset.fields.name}
                       </div>
                     );
                   }
@@ -298,22 +307,28 @@ const AssetIdentification: React.FC = () => {
                           <th className="p-2 border border-gray-300 text-left">
                             <input
                               type="checkbox"
-                              checked={!!selectedAssets[hierarchyData.asset.RFID]}
+                              checked={
+                                !!selectedAssets[hierarchyData.asset.RFID]
+                              }
                               onChange={(e) =>
-                                handleAssetSelect(hierarchyData.asset.RFID, e.target.checked)
+                                handleAssetSelect(
+                                  hierarchyData.asset.RFID,
+                                  e.target.checked
+                                )
                               }
                             />
                           </th>
-                          {['RFID', ...Object.keys(hierarchyData.asset.fields)].map(
-                            (field) => (
-                              <th
-                                key={field}
-                                className="p-2 border border-gray-300 text-left"
-                              >
-                                {formatName(field)}
-                              </th>
-                            )
-                          )}
+                          {[
+                            "RFID",
+                            ...Object.keys(hierarchyData.asset.fields),
+                          ].map((field) => (
+                            <th
+                              key={field}
+                              className="p-2 border border-gray-300 text-left"
+                            >
+                              {formatName(field)}
+                            </th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
@@ -322,11 +337,16 @@ const AssetIdentification: React.FC = () => {
                           <td className="p-2 border border-gray-300">
                             {hierarchyData.asset.RFID}
                           </td>
-                          {Object.keys(hierarchyData.asset.fields).map((fieldKey) => (
-                            <td key={fieldKey} className="p-2 border border-gray-300">
-                              {hierarchyData.asset.fields[fieldKey]}
-                            </td>
-                          ))}
+                          {Object.keys(hierarchyData.asset.fields).map(
+                            (fieldKey) => (
+                              <td
+                                key={fieldKey}
+                                className="p-2 border border-gray-300"
+                              >
+                                {hierarchyData.asset.fields[fieldKey]}
+                              </td>
+                            )
+                          )}
                         </tr>
                       </tbody>
                     </table>
@@ -341,14 +361,17 @@ const AssetIdentification: React.FC = () => {
                   <div className="relative overflow-x-auto">
                     {Object.entries(
                       hierarchyData.assets.reduce((acc, asset) => {
-                        const typeName = getTypeById(asset.type)?.name || 'Unknown';
+                        const typeName =
+                          getTypeById(asset.type)?.name || "Unknown";
                         if (!acc[typeName]) acc[typeName] = [];
                         acc[typeName].push(asset);
                         return acc;
                       }, {})
                     ).map(([typeName, assetsOfType]: [string, any[]]) => (
                       <div key={typeName} className="mt-4">
-                        <h4 className="font-semibold">{formatName(typeName)}</h4>
+                        <h4 className="font-semibold">
+                          {formatName(typeName)}
+                        </h4>
                         <div className="overflow-x-auto">
                           <table className="w-full table-auto border-collapse border border-gray-300 overflow-hidden">
                             <thead className="bg-gray-100">
@@ -358,9 +381,12 @@ const AssetIdentification: React.FC = () => {
                                     type="checkbox"
                                     onChange={(e) => {
                                       const isChecked = e.target.checked;
-                                      const updatedSelectedAssets = { ...selectedAssets };
+                                      const updatedSelectedAssets = {
+                                        ...selectedAssets,
+                                      };
                                       assetsOfType.forEach((asset) => {
-                                        updatedSelectedAssets[asset.RFID] = isChecked;
+                                        updatedSelectedAssets[asset.RFID] =
+                                          isChecked;
                                       });
                                       setSelectedAssets(updatedSelectedAssets);
                                     }}
@@ -369,16 +395,17 @@ const AssetIdentification: React.FC = () => {
                                     )}
                                   />
                                 </th>
-                                {['RFID', ...Object.keys(assetsOfType[0].fields)].map(
-                                  (field) => (
-                                    <th
-                                      key={field}
-                                      className="p-2 border border-gray-300 text-left"
-                                    >
-                                      {formatName(field)}
-                                    </th>
-                                  )
-                                )}
+                                {[
+                                  "RFID",
+                                  ...Object.keys(assetsOfType[0].fields),
+                                ].map((field) => (
+                                  <th
+                                    key={field}
+                                    className="p-2 border border-gray-300 text-left"
+                                  >
+                                    {formatName(field)}
+                                  </th>
+                                ))}
                               </tr>
                             </thead>
                             <tbody>
@@ -389,13 +416,21 @@ const AssetIdentification: React.FC = () => {
                                       type="checkbox"
                                       checked={!!selectedAssets[asset.RFID]}
                                       onChange={(e) =>
-                                        handleAssetSelect(asset.RFID, e.target.checked)
+                                        handleAssetSelect(
+                                          asset.RFID,
+                                          e.target.checked
+                                        )
                                       }
                                     />
                                   </td>
-                                  <td className="p-2 border border-gray-300">{asset.RFID}</td>
+                                  <td className="p-2 border border-gray-300">
+                                    {asset.RFID}
+                                  </td>
                                   {Object.keys(asset.fields).map((fieldKey) => (
-                                    <td key={fieldKey} className="p-2 border border-gray-300">
+                                    <td
+                                      key={fieldKey}
+                                      className="p-2 border border-gray-300"
+                                    >
                                       {asset.fields[fieldKey]}
                                     </td>
                                   ))}
@@ -414,12 +449,8 @@ const AssetIdentification: React.FC = () => {
         )}
         {/* Back Button */}
         <div className="flex justify-end space-x-4 mt-6">
-          <button
-            onClick={handleBack}
-            className="bg-[#00B894] hover:bg-[#009D80] text-white py-2 px-4 rounded"
-          >
-            Back
-          </button>
+        
+          <ActionButton type="back" onClick={handleBack} />
         </div>
       </div>
     </div>

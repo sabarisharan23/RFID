@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import ActionButton from "../../Components/Buttons";
 
 const Location: React.FC = () => {
   const navigate = useNavigate();
@@ -26,18 +27,9 @@ const Location: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-2xl font-semibold pb-4">Locations</h1>
       <div className="flex space-x-4 pb-3">
-        <button
-          className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
-          onClick={() => navigate("/add-location")}
-        >
-          Add
-        </button>
-        <button
-          className="bg-yellow-500 text-white px-4 py-2 rounded"
-          onClick={downloadTableAsExcel}
-        >
-          Export to Excel
-        </button>
+
+        <ActionButton type="add" onClick={() => navigate("/add-location")} />
+        <ActionButton type="excel" onClick={downloadTableAsExcel} />
       </div>
       <div className="flex justify-between items-center mb-4"></div>
       <div className="bg-white p-4 shadow rounded">
@@ -80,18 +72,9 @@ const Location: React.FC = () => {
                     {location.description}
                   </td>
                   <td className="p-2 border flex justify-center items-center gap-5 border-gray-300 ">
-                    <button
-                      className="bg-[#1ABC9C] hover:bg-[#16A085] text-white py-2 px-4 rounded"
-                      onClick={() => navigate(`/edit-location/${location.id}`)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="bg-[#E74C3C] hover:bg-[#C0392B] text-white py-2 px-4 rounded"
-                      onClick={() => handleDelete (location.id)}
-                    >
-                      Delete
-                    </button>
+                    <ActionButton type="edit" onClick={() => navigate(`/edit-location/${location.id}`)} />
+                    <ActionButton type="delete" onClick={() => handleDelete (location.id)} />
+                   
                   </td>
                 </tr>
               ))}
