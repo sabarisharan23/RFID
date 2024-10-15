@@ -6,7 +6,7 @@ import {
   FaChevronUp,
   FaBars,
   FaCog,
-  FaTag,
+  
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { TbReport } from "react-icons/tb";

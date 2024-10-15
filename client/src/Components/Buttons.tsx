@@ -11,7 +11,7 @@ interface ActionButtonProps {
 }
 const ActionButton: React.FC<ActionButtonProps> = ({ type, onClick, label, disabled,className }) => {
   const handleButtonClick = () => {
-    // Only invoke onClick if it is provided
+    // Only invoke onClick if    is provided
     if (onClick) {
       onClick();
     }
