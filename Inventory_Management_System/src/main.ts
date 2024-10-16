@@ -1,20 +1,17 @@
-import express, { Application } from "express";
-import cors from "cors";
-import assetRout from "./Routers/assetRou";
+// src/index.ts
+import express from 'express';
+import router from "./Routers/assetRou"; // Import the router
 
-const app: Application = express();
-const PORT = 8000;
-app.use(cors());
+const app = express();
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
+// Mount the router
+app.use(router);
 
-
-app.get("/", assetRout);
-
-
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server is running on the port ${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-export default app;
