@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssetType {
+  IOcard
+  Cables
+  DIMM
+  NVDIMM
+  Battery
+  Fans
+  UsbPendrives
+  SSDPendrives
+  HDDDrives
+  FlashCache
+  BootMedia
+  PSU
+  SFP
+  Tools
+}
+
+enum AssetStatus {
+  Available
+  InUse
+  Damaged
+  Maintenance
+  Decommissioned
+  Lost
+}
+
+model Asset {
+  id          Int         @id @default(autoincrement())
+  rfid        String      @unique
+  partNumber  String      @map("part_number")
+  type        AssetType   
+  description String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  status      AssetStatus @default(Available)
+  locationId Int?
+  location   Location? @relation(fields: [locationId], references: [id])
+
+}
+
+model Location {
+  id          Int     @id @default(autoincrement())
+  name        String  
+  description String?
+  assets      Asset[] 
+}
+
