@@ -3,134 +3,205 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Change to your database provider if different
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Enum for AssetToTransaction status
-enum AssetTransactionStatus {
+enum RequestStatus {
   approvalPending
   returnPending
   returned
   rejected
 }
 
-// Enum for Transaction status
-enum TransactionStatus {
-  approvalPending
-  returnPending
-  returned
-  rejected
+model User {
+  id             Int           @id @default(autoincrement())
+  username       String
+  email          String        @unique
+  hashedPassword String        @map("hashed_password")
+  isActive       Boolean       @map("is_active")
+  isAdmin        Boolean       @map("is_admin")
+  userPlace      UserPlace[]
+  asset          Asset[]
+  request        Request[]
+  Transaction    Transaction[]
+
+  @@map("user")
 }
 
-model LocationType {
-  id        Int       @id @default(autoincrement())
+model UserPlace {
+  id        Int
+  userId    Int
+  placeId   Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isActive  Boolean  @map("is_active")
+
+  user  User  @relation(fields: [userId], references: [id])
+  place Place @relation(fields: [placeId], references: [id])
+
+  @@id([userId, placeId])
+}
+
+model PlaceType {
+  id        Int      @id @default(autoincrement())
   name      String
-  createdAt DateTime  @default(now())
-  isActive  Boolean
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isActive  Boolean  @map("is_active")
 
-  //locations Location[] @relation("LocationTypeToLocations")
+  Place Place[] @relation("placeType")
 }
 
-model Location {
-  id           Int       @id @default(autoincrement())
-  locationTypeId Int
-  parentId     Int?
-  name         String
-  description  String?
-  isActive     Boolean
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+model Place {
+  id          Int      @id @default(autoincrement())
+  placeTypeId Int
+  parentId    Int?
+  name        String
+  isContainer Boolean
+  description String?
+  isActive    Boolean  @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
- // locationType Location  @relation("LocationTypeToLocations", fields: [locationTypeId], references: [id])
-  parent       Location? @relation("LocationHierarchy", fields: [parentId], references: [id])
-  children     Location[] @relation("LocationHierarchy")
-
-  assets       Asset[]   @relation("LocationToAssets")
+  UserPlace        UserPlace[]
+  parent           Place?        @relation("PlaceHierarchy", fields: [parentId], references: [id])
+  children         Place[]       @relation("PlaceHierarchy")
+  placeType        PlaceType     @relation("placeType", fields: [placeTypeId], references: [id])
+  transactionsFrom Transaction[] @relation("FromPlace")
+  transactionsTo   Transaction[] @relation("ToPlace")
+  assets           Asset[]       @relation("PlaceToAssets")
 }
 
 model Asset {
   rfid       String   @id
-  partNumber Int
-  locationId Int
-  createdAt  DateTime @default(now())
-  isActive   Boolean
-  updatedAt  DateTime @updatedAt
+  isActive   Boolean  @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
   reservedBy String?
 
-  location      Location   @relation("LocationToAssets", fields: [locationId], references: [id])
+  placeId Int
+  place   Place @relation("PlaceToAssets", fields: [placeId], references: [id])
+
+  partNumber     Int
   partNumberData PartNumber @relation("PartNumberToAssets", fields: [partNumber], references: [id])
-  transactions  AssetToTransaction[] @relation("AssetsToAssetToTransaction")
+
+  requsetId Int
+  requset   Request @relation(fields: [requsetId], references: [id])
+
+  transaction Transaction[]
+  fields      RFIDToField[]
+  User        User?         @relation(fields: [userId], references: [id])
+  userId      Int?
 }
 
 model PartNumber {
-  id              Int         @id @default(autoincrement())
-  assetTypeId     Int
-  quantityInUse   Int
-  totalQuantity   Int
+  id                Int     @id @default(autoincrement())
+  quantityInUse     Int
+  totalQuantity     Int
   quantityAvailable Int
-  isActive        Boolean
+  isActive          Boolean @map("is_active")
 
-  assetTypeData AssetType @relation("AssetTypeToPartNumbers", fields: [assetTypeId], references: [id])
-  assets        Asset[]   @relation("PartNumberToAssets")
+  assetTypeId         Int
+  assetType           AssetType             @relation("AssetTypeToPartNumbers", fields: [assetTypeId], references: [id])
+  assets              Asset[]               @relation("PartNumberToAssets")
+  RequestToPartnumber RequestToPartnumber[]
+}
+
+model Request {
+  id          Int           @id @default(autoincrement())
+  requestedBy String
+  respondedBy String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  status      RequestStatus
+  respondedAt DateTime?
+  isActive    Boolean       @map("is_active")
+
+  transactions Transaction[]
+
+  asset               Asset[]
+  RequestToPartnumber RequestToPartnumber[]
+  User                User?                 @relation(fields: [userId], references: [id])
+  userId              Int?
+}
+
+model RequestToPartnumber {
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  status           String
+  quantity         Int?
+  acceptedQuantity Int?
+  rejectedQuantity Int?
+
+  requestId    Int
+  partNumberId Int
+  request      Request    @relation(fields: [requestId], references: [id])
+  partNumber   PartNumber @relation(fields: [partNumberId], references: [id])
 }
 
 model AssetType {
-  id       Int        @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   name     String
-  isActive Boolean
+  isActive Boolean @map("is_active")
 
-  partNumbers PartNumber[] @relation("AssetTypeToPartNumbers")
+  partNumbers PartNumber[]       @relation("AssetTypeToPartNumbers")
+  assetFields AssetTypeToField[] @relation("AssetTypeToAssetField")
+}
+
+model AssetTypeToField {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  assetTypeId Int
+  assetType   AssetType @relation("AssetTypeToAssetField", fields: [assetTypeId], references: [id])
+
+  assetFieldId Int
+  assetField   AssetField @relation("AssetTypeToAssetField", fields: [assetFieldId], references: [id])
 }
 
 model AssetField {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
-  isActive  Boolean
-  createdAt DateTime  @default(now())
+  isActive  Boolean  @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  fieldToPartNumbers FieldToPartNumber[] @relation("AssetFieldToFieldToPartNumber")
-  rfidToFields       RFIDToField[]       @relation("AssetFieldToRFIDToField")
-}
-
-model FieldToPartNumber {
-  id         Int         @id @default(autoincrement())
-  fieldId    Int
-  partNumber Int
-
-  assetField     AssetField @relation("AssetFieldToFieldToPartNumber", fields: [fieldId], references: [id])
- // partNumberData PartNumber @relation(fields: [partNumber], references: [id])
+  rfidToFields RFIDToField[]      @relation("AssetFieldToRFIDToField")
+  assetTypes   AssetTypeToField[] @relation("AssetTypeToAssetField")
 }
 
 model RFIDToField {
-  id        Int       @id @default(autoincrement())
-  fieldId   Int
-  value     String
-  rfid      String
+  id    Int    @id @default(autoincrement())
+  value String
 
+  rfid  String
+  asset Asset  @relation(fields: [rfid], references: [rfid])
+
+  fieldId    Int
   assetField AssetField @relation("AssetFieldToRFIDToField", fields: [fieldId], references: [id])
 }
 
 model Transaction {
-  id          Int               @id @default(autoincrement())
-  requestedBy String
-  createdAt   DateTime          @default(now())
-  status      TransactionStatus
-  respondedBy String?
-  respondedAt DateTime?
-  isActive    Boolean
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isActive  Boolean  @map("is_active")
 
-  assetToTransactions AssetToTransaction[] @relation("TransactionToAssetToTransaction")
+  movedById Int?
+  movedBy   User? @relation(fields: [movedById], references: [id])
+
+  fromId Int?
+  from   Place? @relation("FromPlace", fields: [fromId], references: [id])
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [rfid])
+
+  toId Int?
+  to   Place? @relation("ToPlace", fields: [toId], references: [id])
+
+  requestId Int?
+  request   Request? @relation(fields: [requestId], references: [id])
 }
-
-model AssetToTransaction {
-  id            Int                  @id @default(autoincrement())
-  rfid          String
-  transactionId Int
-  status        AssetTransactionStatus
-
-  asset       Asset       @relation("AssetsToAssetToTransaction", fields: [rfid], references: [rfid])
-  transaction Transaction  @relation("TransactionToAssetToTransaction", fields: [transactionId], references: [id])
-}
-
-
