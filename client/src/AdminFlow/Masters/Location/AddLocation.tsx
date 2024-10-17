@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAssetStore } from '../../store/zustendStore/useAssetStore'; // Adjust the import path as needed
-import ActionButton from '../../Components/Buttons';
+import { useAssetStore } from '../../../store/zustendStore/useAssetStore';
+import ActionButton from '../../../Components/Buttons';
+
 const AddLocation: React.FC = () => {
   const [locationName, setLocationName] = useState('');
   const [locationDescription, setLocationDescription] = useState('');

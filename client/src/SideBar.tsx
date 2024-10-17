@@ -1,17 +1,28 @@
-// Sidebar.tsx
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  FaChevronDown,
-  FaChevronUp,
-  FaBars,
-  FaCog,
-  
-} from "react-icons/fa";
+import { GrTransaction } from "react-icons/gr";
+import { FaChevronDown, FaChevronUp, FaBars, FaCog } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { TbReport } from "react-icons/tb";
+import { MdRequestPage } from "react-icons/md";
+import { PiHardDrives } from "react-icons/pi";
 
 
+
+// Define the structure of the menu items and submenus
+type SubmenuItem = {
+  label: string;
+  route: string;
+};
+
+type MenuItem = {
+  label: string;
+  icon: JSX.Element;
+  route?: string; // Optional if the item has a submenu
+  submenu?: SubmenuItem[]; // Optional if there are no submenus
+};
+
+// Sidebar Component
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation(); // To determine the active route
@@ -19,8 +30,11 @@ const Sidebar: React.FC = () => {
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
 
-  // Define your menu items here
-  const menuItems = [
+  // Retrieve the role from localStorage
+  const role = localStorage.getItem("role");
+
+  // Define your menu items for admin
+  const adminMenuItems: MenuItem[] = [
     {
       label: "Dashboard",
       icon: <MdDashboard />,
@@ -31,28 +45,54 @@ const Sidebar: React.FC = () => {
       icon: <FaCog />,
       submenu: [
         { label: "Location", route: "/location" },
+        // { label: "Row", route: "/row" },
         { label: "Rack", route: "/racks" },
         { label: "Cupboard", route: "/cupboards" },
-        { label: "Assets", route: "/assets" },       
+        { label: "Assets", route: "/assets" },
       ],
     },
-    
+    {
+      label: "Actions",
+      icon: <GrTransaction />,
+      submenu: [
+        { label: "Transaction History", route: "/transaction-history" },
+        { label: "Track Assets", route: "/track-assets" },
+        { label: "Request", route: "/request" },
+      ],
+    },
     {
       label: "Reports",
       icon: <TbReport />,
       submenu: [
-        
         { label: "Asset Search", route: "/asset-search" },
         { label: "Asset Reports", route: "/asset-identification" },
       ],
     },
+  ];
+
+  // Define your menu items for regular users
+  const userMenuItems: MenuItem[] = [
+    {
+      label: "User Dashboard",
+      icon: <MdDashboard />,
+      route: "/user-dashboard",
+    },
+    {
+      label: "User Assets",
+      icon: <PiHardDrives />,
+      route: "/user-assets",
+    },
+    {
+      label: "User Request",
+      icon: <MdRequestPage />,
+      route: "/user-requests",
+    },
     
   ];
-  
+
   // Toggle the sidebar open/closed
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-    // Close   submenus when collapsing the sidebar
     if (isSidebarOpen) {
       setOpenSubmenus({});
     }
@@ -67,12 +107,10 @@ const Sidebar: React.FC = () => {
   };
 
   // Handle click on a menu item
-  const handleItemClick = (item: typeof menuItems[0]) => {
+  const handleItemClick = (item: MenuItem) => {
     if (item.submenu) {
-      // If the item has a submenu, toggle it
       toggleSubmenu(item.label);
-    } else {
-      // If the item has no submenu, navigate directly
+    } else if (item.route) {
       navigate(item.route);
     }
   };
@@ -83,42 +121,29 @@ const Sidebar: React.FC = () => {
   };
 
   // Determine if a route is active
-  const isActive = (route: string) => {
-    return location.pathname === route;
-  };
+  const isActive = (route: string) => location.pathname === route;
 
   // Determine if a menu item is active (for headings)
-  const isMenuActive = (item: typeof menuItems[0]) => {
+  const isMenuActive = (item: MenuItem) => {
     if (item.submenu) {
       return item.submenu.some((sub) => isActive(sub.route));
     }
     return isActive(item.route || "");
   };
 
+  // Choose the menu items based on user role
+  const menuItems = role === "admin" ? adminMenuItems : userMenuItems;
+
   return (
     <div
-      className={`bg-[#121621] text-[#ECF0F1] ${
-        isSidebarOpen ? "w-64" : "w-16"
-      } h-full relative transition-all duration-300 overflow-auto`}
+      className={`bg-[#121621] text-[#ECF0F1] ${isSidebarOpen ? "w-64" : "w-16"} h-full relative transition-all duration-300 overflow-auto`}
     >
       {/* Sidebar Header */}
-      <div
-        className={`flex items-center mt-5 ${
-          isSidebarOpen ? "justify-start" : "justify-center"
-        }`}
-      >
+      <div className={`flex items-center mt-5 ${isSidebarOpen ? "justify-start" : "justify-center"}`}>
         <button className="p-2 mb-4" onClick={toggleSidebar}>
-          <FaBars
-            className={`text-xl ${
-              isSidebarOpen ? "rotate-0" : "rotate-180"
-            } transition-transform duration-300 text-[#BDC3C7]`}
-          />
+          <FaBars className={`text-xl ${isSidebarOpen ? "rotate-0" : "rotate-180"} transition-transform duration-300 text-[#BDC3C7]`} />
         </button>
-
-        {/* Show title only when sidebar is open */}
-        {isSidebarOpen && (
-          <h2 className="text-lg font-semibold mb-4 px-2">Menu</h2>
-        )}
+        {isSidebarOpen && <h2 className="text-lg font-semibold mb-4 px-2">Menu</h2>}
       </div>
 
       {/* Menu Items */}
@@ -134,14 +159,10 @@ const Sidebar: React.FC = () => {
               className="py-2 cursor-pointer group relative"
               onClick={() => handleItemClick(menuItem)}
               onMouseEnter={() =>
-                !isSidebarOpen && hasSubmenu
-                  ? setHoveredMenu(menuItem.label)
-                  : null
+                !isSidebarOpen && hasSubmenu ? setHoveredMenu(menuItem.label) : null
               }
               onMouseLeave={() =>
-                !isSidebarOpen && hasSubmenu
-                  ? setHoveredMenu(null)
-                  : null
+                !isSidebarOpen && hasSubmenu ? setHoveredMenu(null) : null
               }
             >
               {/* Menu Item */}
@@ -149,17 +170,13 @@ const Sidebar: React.FC = () => {
                 className={`flex items-center px-2 py-2 ${
                   isSidebarOpen ? "justify-between" : "justify-center"
                 } ${
-                  menuActive
-                    ? "bg-[#635bff]"
-                    : "hover:bg-[#1ABC9C] transition-colors duration-200"
+                  menuActive ? "bg-[#635bff]" : "hover:bg-[#1ABC9C] transition-colors duration-200"
                 } rounded-md`}
               >
                 {/* Icon and Label */}
                 <div className="flex items-center">
                   <span className="text-xl">{menuItem.icon}</span>
-                  {isSidebarOpen && (
-                    <span className="ml-4">{menuItem.label}</span>
-                  )}
+                  {isSidebarOpen && <span className="ml-4">{menuItem.label}</span>}
                 </div>
 
                 {/* Chevron for submenu items */}
@@ -178,9 +195,7 @@ const Sidebar: React.FC = () => {
                       <li
                         key={subItem.route}
                         className={`w-full text-white px-4 py-2 rounded-md ${
-                          isActive(subItem.route)
-                            ? "bg-[#1ABC9C]"
-                            : "hover:bg-[#1ABC9C] transition-colors duration-200"
+                          isActive(subItem.route) ? "bg-[#1ABC9C]" : "hover:bg-[#1ABC9C] transition-colors duration-200"
                         }`}
                         onClick={(e) => {
                           e.stopPropagation(); // Prevent triggering parent onClick

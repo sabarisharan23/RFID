@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
-import ActionButton from "../../Components/Buttons";
+import { useAssetStore } from "../../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import ActionButton from "../../../Components/Buttons";
 
 const EditLocation: React.FC = () => {
   const { id } = useParams<{ id: string }>();

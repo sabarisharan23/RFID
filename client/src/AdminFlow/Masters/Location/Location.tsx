@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
-import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
-import ActionButton from "../../Components/Buttons";
+import { useAssetStore } from "../../../store/zustendStore/useAssetStore";
+import ActionButton from "../../../Components/Buttons";
 
 const Location: React.FC = () => {
   const navigate = useNavigate();

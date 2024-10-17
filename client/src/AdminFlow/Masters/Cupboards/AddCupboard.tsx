@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
-import ActionButton from "../../Components/Buttons";
+import { useAssetStore } from "../../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import ActionButton from "../../../Components/Buttons";
 
 const AddCupboard: React.FC = () => {
   const navigate = useNavigate();

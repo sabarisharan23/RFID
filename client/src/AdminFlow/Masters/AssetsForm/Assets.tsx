@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import { useAssetStore } from "../../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 import * as XLSX from "xlsx";
-import ActionButton from "../../Components/Buttons";
+import ActionButton from "../../../Components/Buttons";
 
 const AssetTable: React.FC = () => {
   const navigate = useNavigate();

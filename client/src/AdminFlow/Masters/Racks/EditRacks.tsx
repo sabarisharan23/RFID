@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAssetStore } from "../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
+import { useAssetStore } from "../../../store/zustendStore/useAssetStore"; // Adjust the import path as needed
 
 const EditRackForm: React.FC = () => {
   const navigate = useNavigate();

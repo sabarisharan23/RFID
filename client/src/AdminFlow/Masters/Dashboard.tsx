@@ -1,6 +1,6 @@
 // Dashboard.tsx
 import React, { useEffect, useState } from "react";
-import { useAssetStore } from "../store/zustendStore/useAssetStore";
+import { useAssetStore } from "../../store/zustendStore/useAssetStore";
 import {
   Chart as ChartJS,
   CategoryScale,
