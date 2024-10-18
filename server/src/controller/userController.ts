@@ -39,5 +39,4 @@ export async function updateUser(req: Request, res: Response) {
   }
 }
 
-// const userController = new UserController();
-// export default userController;
+
