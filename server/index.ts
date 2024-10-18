@@ -1,9 +1,9 @@
-import express from 'express';
-import cors from 'cors';
-import { initServer, createExpressEndpoints } from '@ts-rest/express';
-import { contract } from './contract';
-import { PrismaClient, User } from '@prisma/client';
-import bcrypt from 'bcrypt';  // Import bcrypt for password hashing
+import express from "express";
+import cors from "cors";
+import { initServer, createExpressEndpoints } from "@ts-rest/express";
+import { contract } from "./contract";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt"; // Import bcrypt for password hashing
 
 const prisma = new PrismaClient();
 const app = express();
@@ -34,12 +34,12 @@ const router = s.router(contract, {
       // Don't include the password in the response
       const { password: _, ...safeUser } = user;
 
-      return { status: 201, body: safeUser as User };
+      return { status: 201, body: safeUser };
     } catch (error) {
       if (error instanceof Error) {
         return { status: 400, body: { message: error.message } };
       }
-      return { status: 400, body: { message: 'An unknown error occurred' } };
+      return { status: 400, body: { message: "An unknown error occurred" } };
     }
   },
 
@@ -56,12 +56,12 @@ const router = s.router(contract, {
         },
       });
 
-      return { status: 200, body: users as User[] };
+      return { status: 200, body: users };
     } catch (error) {
       if (error instanceof Error) {
         return { status: 400, body: { message: error.message } };
       }
-      return { status: 400, body: { message: 'An unknown error occurred' } };
+      return { status: 400, body: { message: "An unknown error occurred" } };
     }
   },
 });

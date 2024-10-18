@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,11 +7,168 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  username  String
-  password  String   // Ensure this field is included in your model
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum RequestStatus {
+  approvalPending
+  returnPending
+  returned
+  rejected
 }
 
+model User {
+  id             Int           @id @default(autoincrement())
+  username       String
+  email          String        @unique
+  hashedPassword String        @map("hashed_password")
+  isActive       Boolean       @map("is_active")
+  isAdmin        Boolean       @map("is_admin")
+  userPlace      Group[]
+  asset          Asset[]
+  request        Request[]
+  Transaction    Transaction[]
+
+  @@map("user")
+}
+
+model Group {
+  id        Int
+  userId    Int
+  placeId   Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isActive  Boolean  @map("is_active")
+
+  user  User  @relation(fields: [userId], references: [id])
+  place Place @relation(fields: [placeId], references: [id])
+
+  @@id([userId, placeId])
+}
+
+model PlaceType {
+  id          Int      @id @default(autoincrement())
+  name        String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  isActive    Boolean  @map("is_active")
+  parentId    Int?
+  isContainer Boolean
+
+  Place       Place[]  @relation("placeType")
+}
+
+model Place {
+  id          Int    @id @default(autoincrement())
+  placeTypeId Int
+  parentId    Int?
+  name        String
+  description String?
+  isActive    Boolean  @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  UserPlace        Group[]
+  parent           Place?        @relation("PlaceHierarchy", fields: [parentId], references: [id])
+  children         Place[]       @relation("PlaceHierarchy")
+  placeType        PlaceType     @relation("placeType", fields: [placeTypeId], references: [id])
+  transactionsFrom Transaction[] @relation("FromPlace")
+  transactionsTo   Transaction[] @relation("ToPlace")
+  assets           Asset[]       @relation("PlaceToAssets")
+}
+
+model Asset {
+  rfid       String   @id
+  isActive   Boolean  @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  reservedBy String?
+
+  placeId Int
+  place   Place @relation("PlaceToAssets", fields: [placeId], references: [id])
+
+  partNumber     Int
+  partNumberData PartNumber @relation("PartNumberToAssets", fields: [partNumber], references: [id])
+
+  requsetId Int
+  requset   Request @relation(fields: [requsetId], references: [id])
+
+  transaction Transaction[]
+  fields      String
+  User        User?         @relation(fields: [userId], references: [id])
+  userId      Int?
+}
+
+model PartNumber {
+  id                Int     @id @default(autoincrement())
+  quantityInUse     Int
+  totalQuantity     Int
+  quantityAvailable Int
+  isActive          Boolean @map("is_active")
+
+  assetTypeId         Int
+  assetType           AssetType             @relation("AssetTypeToPartNumbers", fields: [assetTypeId], references: [id])
+  assets              Asset[]               @relation("PartNumberToAssets")
+  RequestToPartnumber RequestToPartnumber[]
+}
+
+model Request {
+  id          Int           @id @default(autoincrement())
+  requestedBy String
+  respondedBy String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  status      RequestStatus
+  respondedAt DateTime?
+  isActive    Boolean       @map("is_active")
+
+  transactions Transaction[]
+
+  asset               Asset[]
+  RequestToPartnumber RequestToPartnumber[]
+  User                User?                 @relation(fields: [userId], references: [id])
+  userId              Int?
+}
+
+model RequestToPartnumber {
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  status           String
+  quantity         Int?
+  acceptedQuantity Int?
+  rejectedQuantity Int?
+
+  requestId    Int
+  partNumberId Int
+  request      Request    @relation(fields: [requestId], references: [id])
+  partNumber   PartNumber @relation(fields: [partNumberId], references: [id])
+}
+
+model AssetType {
+  id       Int     @id @default(autoincrement())
+  name     String
+  isActive Boolean @map("is_active")
+
+  partNumbers PartNumber[]       @relation("AssetTypeToPartNumbers")
+  assetFields String 
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isActive  Boolean  @map("is_active")
+
+  movedById Int?
+  movedBy   User? @relation(fields: [movedById], references: [id])
+
+  fromId Int?
+  from   Place? @relation("FromPlace", fields: [fromId], references: [id])
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [rfid])
+
+  toId Int?
+  to   Place? @relation("ToPlace", fields: [toId], references: [id])
+
+  requestId Int?
+  request   Request? @relation(fields: [requestId], references: [id])
+}
