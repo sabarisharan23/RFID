@@ -21,7 +21,7 @@ model User {
   hashedPassword String        @map("hashed_password")
   isActive       Boolean       @map("is_active")
   isAdmin        Boolean       @map("is_admin")
-  userPlace      UserPlace[]
+  userPlace      Group[]
   asset          Asset[]
   request        Request[]
   Transaction    Transaction[]
@@ -29,7 +29,7 @@ model User {
   @@map("user")
 }
 
-model UserPlace {
+model Group {
   id        Int
   userId    Int
   placeId   Int
@@ -65,7 +65,7 @@ model Place {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  UserPlace        UserPlace[]
+  UserPlace        Group[]
   parent           Place?        @relation("PlaceHierarchy", fields: [parentId], references: [id])
   children         Place[]       @relation("PlaceHierarchy")
   placeType        PlaceType     @relation("placeType", fields: [placeTypeId], references: [id])
@@ -91,7 +91,7 @@ model Asset {
   requset   Request @relation(fields: [requsetId], references: [id])
 
   transaction Transaction[]
-  fields      RFIDToField[]
+  fields      String
   User        User?         @relation(fields: [userId], references: [id])
   userId      Int?
 }
@@ -148,41 +148,7 @@ model AssetType {
   isActive Boolean @map("is_active")
 
   partNumbers PartNumber[]       @relation("AssetTypeToPartNumbers")
-  assetFields AssetTypeToField[] @relation("AssetTypeToAssetField")
-}
-
-model AssetTypeToField {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime? @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
-
-  assetTypeId Int
-  assetType   AssetType @relation("AssetTypeToAssetField", fields: [assetTypeId], references: [id])
-
-  assetFieldId Int
-  assetField   AssetField @relation("AssetTypeToAssetField", fields: [assetFieldId], references: [id])
-}
-
-model AssetField {
-  id        Int      @id @default(autoincrement())
-  name      String
-  isActive  Boolean  @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  rfidToFields RFIDToField[]      @relation("AssetFieldToRFIDToField")
-  assetTypes   AssetTypeToField[] @relation("AssetTypeToAssetField")
-}
-
-model RFIDToField {
-  id    Int    @id @default(autoincrement())
-  value String
-
-  rfid  String
-  asset Asset  @relation(fields: [rfid], references: [rfid])
-
-  fieldId    Int
-  assetField AssetField @relation("AssetFieldToRFIDToField", fields: [fieldId], references: [id])
+  assetFields String 
 }
 
 model Transaction {
