@@ -1,241 +1,184 @@
-// Dashboard.tsx
-import React, { useEffect, useState } from "react";
-import { useAssetStore } from "../../store/zustendStore/useAssetStore";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import React from "react";
+import { PiHandCoinsFill } from "react-icons/pi";
+import BarChart from "../../Components/Charts/BarChart";
+import PieChart from "../../Components/Charts/PieChart";
+import { GoArrowRight } from "react-icons/go";
+import { MdCircleNotifications } from "react-icons/md";
+import { BsFillFilterSquareFill } from "react-icons/bs";
+import { MdDateRange } from "react-icons/md";
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
+// StatCard Component for displaying top statistics
+const StatCard = ({ title, value }: { title: string; value: number }) => (
+  <div className=" bg-white shadow-lg p-4 rounded-lg">
+    <div className="flex gap-5">
+      <div>
+        <div className="h-12 w-12 rounded-full flex justify-center items-center text-white bg-blue-500">
+          <PiHandCoinsFill className="h-6 w-6" />
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <div className="text-sm font-semibold">{title}</div>
+        <div className="text-2xl font-bold">{value}</div>
+      </div>
+    </div>
+    <div className="flex justify-end items-center">
+      <a href="#" className="flex items-center text-blue-600">
+        View all
+        <GoArrowRight className="ml-1" /> {/* Add margin left for spacing */}
+      </a>
+    </div>
+  </div>
 );
 
+// TransactionRow Component for transaction table rows
+const TransactionRow = () => (
+  <tr className="border-b">
+    <td className="py-6 px-4">24-09-2023 5:00pm</td>
+    <td className="py-6 px-4">HP - Pen drive 32GB</td>
+    <td className="py-6 px-4">Gadgets</td>
+    <td className="py-6 px-4">3</td>
+    <td className="py-6 px-4">Warehouse1</td>
+    <td className="py-6 px-4">Warehouse3</td>
+    <td className="py-6 px-4">Admin 3</td>
+    <td className="py-6 px-4 text-indigo-600 cursor-pointer">View details</td>
+  </tr>
+);
+
+// Dashboard component
 const Dashboard: React.FC = () => {
-  const {
-    assets,
-    counts,
-    assetMovements,
-    auditLogs,
-    getAssetByRFID,
-    getAssetsByType,
-    getAssetMovementsByRFID,
-    getAuditLogsByDate,
-    getAssetsByParentId,
-  } = useAssetStore();
-
-  // State to hold counts
-  const [rowCount, setRowCount] = useState(0);
-  const [rackCount, setRackCount] = useState(0);
-  const [cupboardCount, setCupboardCount] = useState(0);
-  const [assetCount, setAssetCount] = useState(0);
-  const [locationCount, setLocationCount] = useState(0);
-  const locations = useAssetStore((state) => state.getLocations()); // Retrieve locations from Zustand store
-
-  
-  // Fetch counts on component mount and when dependencies change
-  useEffect(() => {
-    // Fetch Rows count (typeId: 21)
-    const row = counts.find(c => c.id === 21);
-    setRowCount(row ? row.totalQuantity : 0);
-// Fetch Locations count (typeId: 20)
-const location = counts.find(c => c.id === 20);
-setLocationCount(location ? location.totalQuantity : 0);
-
-    // Fetch Racks count (typeId: 22)
-    const rack = counts.find(c => c.id === 22);
-    setRackCount(rack ? rack.totalQuantity : 0);
-
-    // Fetch Cupboards count (typeId: 23)
-    const cupboard = counts.find(c => c.id === 23);
-    setCupboardCount(cupboard ? cupboard.totalQuantity : 0);
-
-    // Fetch Assets count (sum counts for typeIds 1-19)
-    const assetTypes = counts.filter(c => c.id >=1 && c.id <=19);
-    const totalAssets = assetTypes.reduce((acc, curr) => acc + curr.totalQuantity, 0);
-    setAssetCount(totalAssets);
-
-    // Fetch LAB-1 asset count
-    const lab = getAssetByRFID("1234567890"); // Assuming "1234567890" is LAB-1 RFID
-    if (lab) {
-      // Get all assets under LAB-1
-      const rows = getAssetsByParentId(lab.RFID);
-      let totalAssetsUnderLab = 0;
-      rows.forEach(row => {
-        const racks = getAssetsByParentId(row.RFID);
-        racks.forEach(rack => {
-          const cupboards = getAssetsByParentId(rack.RFID);
-          totalAssetsUnderLab += cupboards.length;
-        });
-      });
-    } else {
-      setLab1AssetCount(0);
-    }
-
-    // Fetch LAB-1 asset movements in this month
-    const now = new Date();
-    const currentMonth = now.getMonth(); // 0-indexed
-    const currentYear = now.getFullYear();
-    let movementsThisMonth = 0;
-    const labRFIDs = ["1234567890", "1234567891", "1234567892", "1234567893", "1234567896"]; // Adjust as needed
-    labRFIDs.forEach(rfid => {
-      const movements = getAssetMovementsByRFID(rfid);
-      movements.forEach(movement => {
-        const movementDate = new Date(movement.date);
-        if (movementDate.getMonth() === currentMonth && movementDate.getFullYear() === currentYear) {
-          movementsThisMonth +=1;
-        }
-      });
-    });
-
-    // Fetch audit logs for today
-    const today = new Date();
-    const auditsToday = getAuditLogsByDate(today).length;
-  }, [counts, assets, assetMovements, auditLogs, getAssetByRFID, getAssetsByType, getAssetMovementsByRFID, getAuditLogsByDate, getAssetsByParentId]);
-
-  // Data for Asset Movement Tracking Chart
-  const [movementChartData, setMovementChartData] = useState<any>({});
-
-  useEffect(() => {
-    // Example: Monthly Asset Movement Tracking for the past 6 months
-    const now = new Date();
-    const labels = [];
-    const totalMovements = [];
-    const equipmentMovements = [];
-
-    for (let i = 5; i >=0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const month = date.toLocaleString('default', { month: 'short' });
-      const year = date.getFullYear();
-      labels.push(`${month} ${year}`);
-
-      // Total Movements
-      const movements = assetMovements.filter(movement => {
-        return movement.date.getMonth() === date.getMonth() && movement.date.getFullYear() === date.getFullYear();
-      }).length;
-      totalMovements.push(movements);
-
-      // Equipment Movements (assuming movementType 'out' is equipment)
-      const equipment = assetMovements.filter(movement => {
-        return movement.date.getMonth() === date.getMonth() && movement.date.getFullYear() === date.getFullYear() && movement.movementType === 'out';
-      }).length;
-      equipmentMovements.push(equipment);
-    }
-
-    setMovementChartData({
-      labels,
-      datasets: [
-        {
-          label: 'Total Asset Movement',
-          data: totalMovements,
-          backgroundColor: 'gray',
-        },
-        {
-          label: 'Equipment Movement',
-          data: equipmentMovements,
-          backgroundColor: '#635bff',
-        },
-      ],
-    });
-  }, [assetMovements]);
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Navbar */}
-      {/* If you have a navbar component, include it here */}
-
-      {/* Dashboard Header */}
-      <div className="text-3xl font-semibold mt-6">Dashboard</div>
-
-      {/* Counts Cards */}
-      <div className="grid grid-cols-4 gap-4 mt-6">
-        {/* Rows Count */}
-        <div className="bg-white p-4 shadow rounded">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold">Rows</div>
-            <div className="bg-blue-200 text-blue-800 py-1 px-3 rounded-full text-sm">
-              Total
-            </div>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div className="text-2xl font-bold">Welcome Rahman</div>
+        <div className="relative cursor-pointer">
+          <div className="absolute top-[-8px] text-xs right-[-6px] h-6 w-6 rounded-full bg-red-600 text-white border-2 border-white flex justify-center items-center">
+            34
           </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold">{rowCount}</div>
-            <div className="text-gray-500">Total Rows</div>
+          <MdCircleNotifications className="h-12 w-12 text-blue-600" />
+        </div>
+      </div>
+
+      {/* Main Section with Stats and Sidebar */}
+      <div className="grid grid-cols-4 gap-5 mt-6">
+        <div className="col-span-3">
+          {/* Stat Cards */}
+          <div className="grid grid-cols-4 gap-4">
+            <StatCard title="Total Assets" value={102890} />
+            <StatCard title="Total Rows" value={5569} />
+            <StatCard title="Total Racks/Cupboards" value={849} />
+            <StatCard title="Total Locations" value={359} />
+          </div>
+
+          {/* Recent Transactions */}
+          <div className="bg-white   p-6 shadow rounded-lg mt-6">
+            <div className="flex justify-between">
+              <div className="text-lg font-bold mb-4">Recent Transactions</div>
+              <div className="text-lg font-bold mb-4 text-black">
+                <BsFillFilterSquareFill className="h-6 w-6 text-green-700 cursor-pointer" />{" "}
+              </div>
+            </div>
+            <table className="min-w-full  text-sm text-left">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="py-5  px-4">S.No</th>
+                  <th className="py-5  px-4">Date & Time</th>
+                  <th className="py-5  px-4">Asset Name</th>
+                  <th className="py-5  px-4">Category</th>
+                  <th className="py-5  px-4">Count</th>
+                  <th className="py-5  px-4">From (Location)</th>
+                  <th className="py-5  px-4">To (Location)</th>
+                  <th className="py-5  px-4">Done By</th>
+                  <th className="py-5  px-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="py-5">
+                <TransactionRow />
+                <TransactionRow />
+                <TransactionRow />
+                <TransactionRow />
+                <TransactionRow />
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Racks Count */}
-        <div className="bg-white p-4 shadow rounded">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold">Racks</div>
-            <div className="bg-yellow-200 text-yellow-800 py-1 px-3 rounded-full text-sm">
-              Total
+        {/* Sidebar */}
+        <div className="col-span-1 space-y-5 ">
+          {/* Pending Requests */}
+          <div className="bg-white p-4 shadow-lg rounded-lg">
+            <div className="text-black text-lg font-semibold">
+              Pending Requests
             </div>
+            <div className="text-4xl font-semibold mt-2">57</div>
           </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold">{rackCount}</div>
-            <div className="text-gray-500">Total Racks</div>
-          </div>
-        </div>
 
-        {/* Cupboards Count */}
-        <div className="bg-white p-4 shadow rounded">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold">Cupboards</div>
-            <div className="bg-purple-200 text-purple-800 py-1 px-3 rounded-full text-sm">
-              Total
+          {/* Asset Transactions */}
+          <div className="bg-white p-4 shadow-lg rounded-lg">
+            <div className="flex justify-between">
+              <div className="text-lg font-semibold">Asset Transactions</div>
+              <div className="text-lg font-semibold text-black">
+                <MdDateRange className="h-6 w-6 text-green-700 cursor-pointer" />{" "}
+              </div>
+            </div>
+            <div className="flex justify-around mt-4">
+              <div className="flex flex-col w-28">
+                <div className="shadow-lg rounded-lg ">
+                  <div className="flex justify-center bg-[#23B6E9] text-white px-5 py-2 rounded-lg">
+                    IN
+                  </div>
+                  <div className="flex justify-center text-2xl font-semibold items-center py-5 px-5">
+                    {365}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col w-28">
+                <div className="shadow-lg rounded-lg ">
+                  <div className="flex justify-center bg-[#23B6E9] text-white px-5 py-2 rounded-lg">
+                    OUT
+                  </div>
+                  <div className="flex justify-center text-2xl font-semibold items-center py-5 px-5">
+                    {365}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold">{cupboardCount}</div>
-            <div className="text-gray-500">Total Cupboards</div>
-          </div>
-        </div>
 
-        {/* Assets Count */}
-        <div className="bg-white p-4 shadow rounded">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold">Assets</div>
-            <div className="bg-green-200 text-green-800 py-1 px-3 rounded-full text-sm">
-              Total
+          {/* RFID Devices */}
+          <div className="bg-white p-4 shadow-lg rounded-lg">
+            <h3 className="text-lg font-semibold">RFID Devices</h3>
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-col gap-3">
+                <div>Total Devices</div>
+                <div className="bg-[#23C093] flex justify-center text-white px-5 py-2 rounded-lg font-semibold">
+                  90
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div>Devices in Use</div>
+                <div className="bg-[#23C093] flex justify-center text-white px-5 py-2 rounded-lg font-semibold">
+                  35
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div>Damaged Devices</div>
+                <div className="bg-[#23C093] flex justify-center text-white px-5 py-2 rounded-lg font-semibold">
+                  35
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold">{assetCount}</div>
-            <div className="text-gray-500">Total Assets</div>
           </div>
         </div>
       </div>
 
-      {/* LAB-1 Asset Movement and Count */}
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        {/* LAB-1 Card */}
-        <div className="bg-white p-4 shadow rounded">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold">Locations</div>
-            <div className="bg-green-200 text-green-800 py-1 px-3 rounded-full text-sm">
-              This Month
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold">{locations.length}</div>
-            {/* <div className="text-gray-500">Location Count/</div> */}
-            <div className="text-gray-500 mt-3">Asset Count</div>
-            <div className="mt-4 text-3xl font-bold">{assetCount}</div>
-          </div>
+      {/* Charts Section */}
+      <div className="grid grid-cols-2 gap-6 mt-6">
+        <BarChart />
+        <div className="p-4 bg-white rounded shadow-md">
+          <h3 className="text-lg font-bold mb-4">Request Analysis</h3>
+          <PieChart />
         </div>
-
-        {/* Audit Card */}
-        
       </div>
     </div>
   );

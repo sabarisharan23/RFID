@@ -74,7 +74,7 @@ const adminRoutes = [
   },
   {
     path: "/add-assets",
-    element: <AssetTable />,
+    element: <AssetForm />,
     handle: { title: "assets" },
   },
   {
@@ -84,7 +84,7 @@ const adminRoutes = [
   },
   {
     path: "/assets",
-    element: <AssetForm />,
+    element: <AssetTable />,
     handle: { title: "add-assets" },
   },
   {
